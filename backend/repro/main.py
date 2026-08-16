@@ -15,10 +15,11 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 
 from . import agent, db, demo, patcher, repo as repo_mod, report, tests
-from .config import cfg, ensure_dirs
+from .config import REPRO_ROOT, cfg, ensure_dirs
 from .sandbox import Sandbox
 
 ensure_dirs()
@@ -34,6 +35,22 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# ------------------------------------------------------------------ production single-service
+# The frontend calls /api/* — in development the Vite proxy strips that
+# prefix; in a single-service deployment (Docker/Render) the backend does
+# it here so the same built frontend works unchanged.
+@app.middleware("http")
+async def api_prefix_rewrite(request: Request, call_next):
+    path = request.scope.get("path", "")
+    if path == "/api" or path.startswith("/api/"):
+        request.scope["orig_path"] = path
+        request.scope["path"] = path[4:] or "/"
+    return await call_next(request)
+
+
+FRONTEND_DIST = REPRO_ROOT / "frontend" / "dist"
 
 TERMINAL = {"fixed", "failed", "no-failure"}
 
@@ -287,3 +304,22 @@ def verify_investigation(iid: str) -> dict:
     db.add_verification(iid, None, run, run, run["failed"] == 0)
     return {"total": run["total"], "passed": run["passed"], "failed": run["failed"],
             "skipped": run["skipped"], "duration": run["duration"]}
+
+
+# ------------------------------------------------------------------ static frontend (production)
+# Serves the built dashboard so the whole product is a single service.
+# Registered last, so it never shadows the API routes above.
+if FRONTEND_DIST.exists():
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa(full_path: str, request: Request):
+        # Never mask API errors: unknown /api/* must 404 as JSON, not return
+        # HTML. The middleware stashes the original path before rewriting.
+        orig = request.scope.get("orig_path", "")
+        if orig == "/api" or orig.startswith("/api/"):
+            raise HTTPException(404, "not found")
+        candidate = FRONTEND_DIST / full_path
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(FRONTEND_DIST / "index.html")

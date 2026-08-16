@@ -1,0 +1,15 @@
+.git
+.gitignore
+data
+*.db
+*.sqlite
+__pycache__
+*.pyc
+.venv
+venv
+node_modules
+frontend/dist
+frontend/tsconfig.tsbuildinfo
+.env
+.env.*
+*.log

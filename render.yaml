@@ -1,0 +1,16 @@
+# Render Blueprint — one-click deploy: https://render.com/deploy?repo=<this repo>
+services:
+  - type: web
+    name: repro
+    runtime: docker
+    repo: https://github.com/SimraFaisal2/repro
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    disk:
+      name: repro-data
+      mountPath: /app/data
+      sizeGB: 1
+    envVars:
+      - key: REPRO_DATA_DIR
+        value: /app/data

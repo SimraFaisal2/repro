@@ -17,6 +17,29 @@ comes from actual execution inside an isolated sandbox.
 
 ---
 
+## Deploy (one click)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/SimraFaisal2/repro)
+
+REPRO ships as a **single self-contained service** — the FastAPI backend serves
+the built React dashboard, so the whole product deploys with one click. The
+Render Blueprint (`render.yaml`) uses the multi-stage `Dockerfile`, mounts a
+persistent disk for the SQLite DB and sandbox workspaces, and runs the offline
+rule-engine path — **no API keys required**. It also deploys to any Docker
+host (Railway, Fly.io, a VPS):
+
+```bash
+docker build -t repro .
+docker run -p 8000:8000 -v repro-data:/app/data -e REPRO_DATA_DIR=/app/data repro
+```
+
+> **Why not Vercel?** REPRO's backend runs the user's tests in an isolated
+> sandbox, streams live events (SSE), and persists to SQLite — all things
+> serverless functions can't do (read-only filesystem, 60s timeouts). A
+> persistent host is the right fit.
+
+---
+
 ## Quick start
 
 ### Backend (API + agent)

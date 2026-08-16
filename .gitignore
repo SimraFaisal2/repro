@@ -1,0 +1,31 @@
+# ─── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ─── Node / frontend ──────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/tsconfig.tsbuildinfo
+*.tsbuildinfo
+
+# ─── Runtime data (regenerated at startup, never committed) ─
+# data/projects  → seeded copies of backend/repro/demo_repos
+# data/workspace → isolated sandbox copies of user repos
+# data/repro.db  → SQLite runtime database
+data/
+
+# ─── Secrets / local config ───────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── OS / editor ──────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

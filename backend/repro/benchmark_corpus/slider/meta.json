@@ -1,0 +1,9 @@
+{
+  "id": "slider",
+  "name": "Consecutive-pair loop is off by one",
+  "class": "Off-by-one",
+  "rule": "off_by_one_range",
+  "modeled_on": "A loop walks every index of a sequence with `for i in range(len(xs))` but the body reads `xs[i + 1]`, running past the end on the final iteration. This is the classic off-by-one that has bitten array-processing code in countless projects — the same shape as the bundled search demo.",
+  "ground_truth": "Stop the loop one element earlier: iterate `range(len(xs) - 1)`.",
+  "failing_test": "tests/test_pairs.py::test_consecutive_pairs"
+}

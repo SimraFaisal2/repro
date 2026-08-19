@@ -1,0 +1,9 @@
+{
+  "id": "schema-drift",
+  "name": "Query references column that no longer exists",
+  "class": "SQL schema drift",
+  "rule": "sql_column_fix",
+  "modeled_on": "A migration renamed a column (`email_addr` -> `email`) but one query was never updated, so every lookup raises `no such column`. Real-world analogue: SQLAlchemy/Django apps after an ALTER TABLE rename where a raw SQL statement or stale ORM field was missed. The fix must read the actual schema to find the real column.",
+  "ground_truth": "Reference the column that actually exists in the schema (`email`, not `email_addr`).",
+  "failing_test": "tests/test_db.py::test_find_by_email"
+}

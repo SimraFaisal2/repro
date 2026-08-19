@@ -1,0 +1,9 @@
+{
+  "id": "profile-lookup",
+  "name": "Profile lookup crashes on unknown user",
+  "class": "NULL dereference",
+  "rule": "none_subscript",
+  "modeled_on": "A lookup helper returns None for missing records and the caller subscripts the result unconditionally. This is the NULL-dereference bug class that repeatedly shows up in auth/session code across open-source projects when a 'get or create' helper is replaced by a plain 'get'. Modeled on the same shape as the bundled auth demo, expanded to a standalone profile module.",
+  "ground_truth": "Guard the lookup result: return None when the user is missing instead of subscripting it.",
+  "failing_test": "tests/test_profile.py::test_display_name_unknown"
+}

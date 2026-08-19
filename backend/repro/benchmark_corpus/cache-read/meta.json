@@ -1,0 +1,9 @@
+{
+  "id": "cache-read",
+  "name": "Config section lookup returns None then subscripts",
+  "class": "NULL dereference",
+  "rule": "none_subscript",
+  "modeled_on": "A dictionary-backed store returns None for a missing section, and the consumer indexes into the value without a guard. The same shape as real-world config/registry crashes where a section was renamed or not yet created — a classic None-after-.get() bug.",
+  "ground_truth": "Guard the section lookup: return None when the section is missing instead of indexing into it.",
+  "failing_test": "tests/test_config.py::test_db_host_missing_section"
+}

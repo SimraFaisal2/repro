@@ -1,0 +1,9 @@
+{
+  "id": "api-v2",
+  "name": "Client reads pre-v2 response key",
+  "class": "API response-shape mismatch",
+  "rule": "key_fix",
+  "modeled_on": "A client was written against API v1 (`results`) but the endpoint now returns v2 JSON where the list moved under `data`. Real-world analogue: the Twitter API v1.1 -> v2 migration, which renamed `statuses`/`results` to `data` and broke hundreds of clients overnight. The failing test supplies the real v2 payload; REPRO must read the key that actually exists.",
+  "ground_truth": "Read `payload[\"data\"]` instead of the removed `payload[\"results\"]` key.",
+  "failing_test": "tests/test_client.py::test_fetch_tweets"
+}

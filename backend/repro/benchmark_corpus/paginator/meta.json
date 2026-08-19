@@ -1,0 +1,9 @@
+{
+  "id": "paginator",
+  "name": "Adjacent-delta loop is off by one",
+  "class": "Off-by-one",
+  "rule": "off_by_one_range",
+  "modeled_on": "A time-series / pagination helper computes deltas between adjacent values but walks `range(len(values))` and reads `values[i + 1]` — IndexError on the final element. Another instance of the classic off-by-one, in a different domain than the slider entry to prove the rule generalizes.",
+  "ground_truth": "Iterate `range(len(values) - 1)` so the last element has no successor.",
+  "failing_test": "tests/test_deltas.py::test_adjacent_deltas"
+}

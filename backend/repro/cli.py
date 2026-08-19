@@ -7,10 +7,12 @@
     python -m repro.cli report <investigation-id>
     python -m repro.cli diff <investigation-id>
     python -m repro.cli verify <investigation-id>
+    python -m repro.cli benchmark [--only id1,id2] [--json out.json]
 """
 from __future__ import annotations
 
 import argparse
+import json
 import queue
 import sys
 import time
@@ -153,6 +155,17 @@ def cmd_diff(args: argparse.Namespace) -> None:
     print(patches[-1].get("diff", ""))
 
 
+def cmd_benchmark(args: argparse.Namespace) -> None:
+    from . import benchmark
+    # Dedicated fresh db so the benchmark never pollutes dev data.
+    benchmark.prepare_db(args.db or benchmark.DEFAULT_DB)
+    data = benchmark.run_benchmark(args.only, timeout=args.timeout)
+    print(benchmark.render_markdown(data))
+    if args.json:
+        Path(args.json).write_text(json.dumps(data, indent=2), encoding="utf-8")
+        print(f"\nwrote {args.json}", file=sys.stderr)
+
+
 def cmd_verify(args: argparse.Namespace) -> None:
     inv = db.get_investigation(args.id)
     if not inv:
@@ -206,6 +219,15 @@ def main() -> None:
     v = sub.add_parser("verify", help="re-run the test suite to verify")
     v.add_argument("id")
     v.set_defaults(fn=cmd_verify)
+
+    b = sub.add_parser("benchmark",
+                       help="run the bug-corpus benchmark and report fix rates")
+    b.add_argument("--only", nargs="*", default=None,
+                   help="comma-separated corpus ids to run (default: all)")
+    b.add_argument("--json", default=None, help="write machine-readable results")
+    b.add_argument("--timeout", type=float, default=300.0, help="seconds per entry")
+    b.add_argument("--db", default=None, help="dedicated sqlite db path")
+    b.set_defaults(fn=cmd_benchmark)
 
     args = p.parse_args()
     args.fn(args)

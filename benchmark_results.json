@@ -1,0 +1,198 @@
+{
+  "ran_at": "2026-08-17 00:52:10",
+  "total": 9,
+  "fixed": 9,
+  "fix_rate": 1.0,
+  "by_class": {
+    "API response-shape mismatch": {
+      "total": 2,
+      "fixed": 2,
+      "ids": [
+        "api-v2",
+        "payload-key"
+      ],
+      "rate": 1.0
+    },
+    "Authentication logic": {
+      "total": 1,
+      "fixed": 1,
+      "ids": [
+        "auth-plaintext"
+      ],
+      "rate": 1.0
+    },
+    "NULL dereference": {
+      "total": 3,
+      "fixed": 3,
+      "ids": [
+        "cache-read",
+        "profile-lookup",
+        "session-attribute"
+      ],
+      "rate": 1.0
+    },
+    "Off-by-one": {
+      "total": 2,
+      "fixed": 2,
+      "ids": [
+        "paginator",
+        "slider"
+      ],
+      "rate": 1.0
+    },
+    "SQL schema drift": {
+      "total": 1,
+      "fixed": 1,
+      "ids": [
+        "schema-drift"
+      ],
+      "rate": 1.0
+    }
+  },
+  "results": [
+    {
+      "id": "api-v2",
+      "name": "Client reads pre-v2 response key",
+      "class": "API response-shape mismatch",
+      "expected_rule": "key_fix",
+      "status": "fixed",
+      "fixed": true,
+      "attempts": 1,
+      "confidence": 0.85,
+      "duration_s": 14.3,
+      "patch_generated": true,
+      "patch_lines": 1,
+      "tests_before": "0p/1f",
+      "tests_after": "1p/0f",
+      "error": "'results'"
+    },
+    {
+      "id": "auth-plaintext",
+      "name": "Password compared in plaintext against stored hash",
+      "class": "Authentication logic",
+      "expected_rule": "auth_hash",
+      "status": "fixed",
+      "fixed": true,
+      "attempts": 1,
+      "confidence": 0.8,
+      "duration_s": 14.6,
+      "patch_generated": true,
+      "patch_lines": 1,
+      "tests_before": "1p/1f",
+      "tests_after": "2p/0f",
+      "error": "assert False is True"
+    },
+    {
+      "id": "cache-read",
+      "name": "Config section lookup returns None then subscripts",
+      "class": "NULL dereference",
+      "expected_rule": "none_subscript",
+      "status": "fixed",
+      "fixed": true,
+      "attempts": 1,
+      "confidence": 0.72,
+      "duration_s": 14.2,
+      "patch_generated": true,
+      "patch_lines": 2,
+      "tests_before": "1p/1f",
+      "tests_after": "2p/0f",
+      "error": "'NoneType' object is not subscriptable"
+    },
+    {
+      "id": "paginator",
+      "name": "Adjacent-delta loop is off by one",
+      "class": "Off-by-one",
+      "expected_rule": "off_by_one_range",
+      "status": "fixed",
+      "fixed": true,
+      "attempts": 1,
+      "confidence": 0.9,
+      "duration_s": 14.4,
+      "patch_generated": true,
+      "patch_lines": 1,
+      "tests_before": "0p/2f",
+      "tests_after": "2p/0f",
+      "error": "list index out of range"
+    },
+    {
+      "id": "payload-key",
+      "name": "Reads renamed payload field",
+      "class": "API response-shape mismatch",
+      "expected_rule": "key_fix",
+      "status": "fixed",
+      "fixed": true,
+      "attempts": 1,
+      "confidence": 0.85,
+      "duration_s": 14.5,
+      "patch_generated": true,
+      "patch_lines": 1,
+      "tests_before": "0p/1f",
+      "tests_after": "1p/0f",
+      "error": "'results'"
+    },
+    {
+      "id": "profile-lookup",
+      "name": "Profile lookup crashes on unknown user",
+      "class": "NULL dereference",
+      "expected_rule": "none_subscript",
+      "status": "fixed",
+      "fixed": true,
+      "attempts": 1,
+      "confidence": 0.9,
+      "duration_s": 14.0,
+      "patch_generated": true,
+      "patch_lines": 2,
+      "tests_before": "1p/1f",
+      "tests_after": "2p/0f",
+      "error": "'NoneType' object is not subscriptable"
+    },
+    {
+      "id": "schema-drift",
+      "name": "Query references column that no longer exists",
+      "class": "SQL schema drift",
+      "expected_rule": "sql_column_fix",
+      "status": "fixed",
+      "fixed": true,
+      "attempts": 1,
+      "confidence": 0.85,
+      "duration_s": 14.6,
+      "patch_generated": true,
+      "patch_lines": 1,
+      "tests_before": "0p/1f",
+      "tests_after": "1p/0f",
+      "error": "no such column: email_addr"
+    },
+    {
+      "id": "session-attribute",
+      "name": "Session attribute access on None user",
+      "class": "NULL dereference",
+      "expected_rule": "none_attribute",
+      "status": "fixed",
+      "fixed": true,
+      "attempts": 1,
+      "confidence": 0.75,
+      "duration_s": 14.5,
+      "patch_generated": true,
+      "patch_lines": 2,
+      "tests_before": "1p/1f",
+      "tests_after": "2p/0f",
+      "error": "'NoneType' object has no attribute 'email'"
+    },
+    {
+      "id": "slider",
+      "name": "Consecutive-pair loop is off by one",
+      "class": "Off-by-one",
+      "expected_rule": "off_by_one_range",
+      "status": "fixed",
+      "fixed": true,
+      "attempts": 1,
+      "confidence": 0.9,
+      "duration_s": 14.3,
+      "patch_generated": true,
+      "patch_lines": 1,
+      "tests_before": "0p/2f",
+      "tests_after": "2p/0f",
+      "error": "list index out of range"
+    }
+  ]
+}

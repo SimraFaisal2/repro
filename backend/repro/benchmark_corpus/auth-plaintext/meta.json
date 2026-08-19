@@ -1,0 +1,9 @@
+{
+  "id": "auth-plaintext",
+  "name": "Password compared in plaintext against stored hash",
+  "class": "Authentication logic",
+  "rule": "auth_hash",
+  "modeled_on": "The login path compares the raw password with the stored hash instead of hashing the input first — a credential-comparison bug that has caused real auth bypass/confusion bugs in OSS projects when code was written against a plaintext store and later moved to hashes. The failing test proves the stored value is hashed, so the comparison must hash the incoming password.",
+  "ground_truth": "Compare `hash_password(password)` against the stored hash.",
+  "failing_test": "tests/test_auth.py::test_authenticate_correct_password"
+}

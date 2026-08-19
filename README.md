@@ -73,6 +73,7 @@ cd backend
 .venv/Scripts/python -m repro.cli report <id>
 .venv/Scripts/python -m repro.cli diff <id>
 .venv/Scripts/python -m repro.cli verify <id>
+.venv/Scripts/python -m repro.cli benchmark                 # run the bug corpus, report fix rate
 ```
 
 ---
@@ -123,9 +124,13 @@ backend/repro/
   report.py     markdown report builder
   repo.py       repository analysis (structure, deps, graph)
   demo.py       bundled broken demo repositories
+  benchmark.py  bug-corpus benchmark runner (fix-rate reporting)
   cli.py        command-line interface
   db.py         SQLite persistence (projects, investigations, runs, events)
   models.py     Pydantic schemas
+
+benchmark_corpus/  nine real-world-style bug reproductions (one per failure class)
+benchmark_results.json  latest benchmark run (fix rate, per-entry detail)
 
 frontend/src/
   pages/        Landing · Dashboard · Investigation workspace
@@ -145,6 +150,47 @@ each with a genuine bug and a failing test:
 | `api`        | Incorrect API response handling |
 | `sql`        | Incorrect SQL query          |
 | `auth2`      | Authentication logic bug     |
+
+## Benchmark
+
+REPRO ships with a **bug-corpus benchmark** (`backend/repro/benchmark_corpus/`) — nine
+small, self-contained Python projects, each with a genuine bug modeled on a real-world
+failure class and a failing test that defines the expected behaviour. The benchmark runs
+the full agent loop against every entry and reports the fix rate, overall and by class:
+
+```bash
+cd backend
+.venv/Scripts/python -m repro.benchmark                 # all entries, print table + JSON
+.venv/Scripts/python -m repro.benchmark --only api-v2   # a subset (comma/space-separated)
+.venv/Scripts/python -m repro.benchmark --db bench.db   # custom dedicated db
+```
+
+The same run is available through the CLI (`python -m repro.cli benchmark`). Each entry
+uses a fresh project + investigation and a **dedicated SQLite db** (`data/benchmark.db`),
+so the benchmark never pollutes dev data and is reproducible. Results are written to
+`benchmark_results.json`.
+
+| id                | class                         | rule             |
+|-------------------|-------------------------------|------------------|
+| `profile-lookup`  | NULL dereference              | `none_subscript` |
+| `cache-read`      | NULL dereference              | `none_subscript` |
+| `session-attribute` | NULL dereference            | `none_attribute` |
+| `slider`          | Off-by-one                    | `off_by_one_range` |
+| `paginator`       | Off-by-one                    | `off_by_one_range` |
+| `api-v2`          | API response-shape mismatch   | `key_fix`        |
+| `payload-key`     | API response-shape mismatch   | `key_fix`        |
+| `schema-drift`    | SQL schema drift              | `sql_column_fix` |
+| `auth-plaintext`  | Authentication logic          | `auth_hash`      |
+
+Each entry's `meta.json` documents the real-world incident class it models (e.g. `api-v2`
+mirrors the Twitter API v1.1 → v2 migration that moved the list under `data`). The corpus
+targets the deterministic rule engine's supported failure classes, so the fix rate measures
+the offline engine — an LLM provider (OpenAI/Anthropic/Ollama) extends coverage beyond
+those classes.
+
+Current result (rule engine, no LLM): **9/9 fixed (100%)** — every failure reproduced,
+diagnosed, patched and verified in the sandbox. See `benchmark_results.json` for the
+machine-readable run (attempts, confidence, before/after test counts, durations).
 
 ## Configuration
 

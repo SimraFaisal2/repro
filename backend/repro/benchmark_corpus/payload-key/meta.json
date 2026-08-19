@@ -1,0 +1,9 @@
+{
+  "id": "payload-key",
+  "name": "Reads renamed payload field",
+  "class": "API response-shape mismatch",
+  "rule": "key_fix",
+  "modeled_on": "A REST endpoint renamed a field in its JSON response (`items` -> `results` is not present; the payload uses `items`), and the consumer kept the old key. Second instance of the response-shape class with a different key pair, proving the fix generalizes beyond the v2 migration example.",
+  "ground_truth": "Read `payload[\"items\"]` — the key that exists in the traced payload.",
+  "failing_test": "tests/test_repo.py::test_list_repos"
+}

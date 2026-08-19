@@ -1,0 +1,9 @@
+{
+  "id": "session-attribute",
+  "name": "Session attribute access on None user",
+  "class": "NULL dereference",
+  "rule": "none_attribute",
+  "modeled_on": "A session carries an optional user; when logged out, get_user() returns None and the code calls .email on it. The same None-attribute crash class shows up in middleware and view layers of many OSS web frameworks when 'optional user' flows were added late.",
+  "ground_truth": "Guard the user lookup: return None when the session has no user instead of touching .email.",
+  "failing_test": "tests/test_session.py::test_email_for_anonymous_session"
+}

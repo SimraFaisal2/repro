@@ -14,3 +14,5 @@ services:
     envVars:
       - key: REPRO_DATA_DIR
         value: /app/data
+      - key: REPRO_CORS_ORIGINS
+        value: https://repro-plum.vercel.app

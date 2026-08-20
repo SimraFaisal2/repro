@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import queue
 import shutil
 import zipfile
@@ -25,12 +26,22 @@ from .sandbox import Sandbox
 ensure_dirs()
 db.init_db()
 
+def _cors_origins() -> list[str]:
+    """Localhost dev origins, plus any comma-separated production origins
+    provided via REPRO_CORS_ORIGINS (e.g. the deployed Vercel frontend)."""
+    extra = [o.strip() for o in os.environ.get("REPRO_CORS_ORIGINS", "").split(",") if o.strip()]
+    return [
+        "http://localhost:5173", "http://127.0.0.1:5173",
+        "http://localhost:3000", "http://127.0.0.1:3000",
+        *extra,
+    ]
+
+
 app = FastAPI(title="REPRO", version="0.1.0", description="Runtime Error Investigation & Repair Orchestrator")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173",
-                   "http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

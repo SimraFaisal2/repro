@@ -1,6 +1,9 @@
 import type { Investigation, Project } from "./types";
 
-const BASE = "/api";
+// Same-origin by default (Vite dev proxy / single-service Docker). When the
+// frontend is hosted separately from the backend, point VITE_API_BASE at the
+// backend origin, e.g. VITE_API_BASE=https://repro-backend.onrender.com
+const BASE = import.meta.env.VITE_API_BASE || "/api";
 
 async function j<T>(res: Response): Promise<T> {
   if (!res.ok) {

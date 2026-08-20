@@ -1,0 +1,12 @@
+backend
+data
+*.db
+*.sqlite
+node_modules
+frontend/dist
+.venv
+venv
+.env
+.env.*
+*.log
+.git

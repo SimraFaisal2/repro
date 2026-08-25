@@ -1,0 +1,21 @@
+{
+  "id": "off-by-one",
+  "name": "Adjacent-sum comprehension walks one index too far",
+  "category": "off-by-one",
+  "class": "Off-by-one",
+  "rule": "off_by_one_range",
+  "difficulty": "easy",
+  "modeled_on": "A list comprehension computes adjacent sums but iterates `range(len(values))` and reads `values[i + 1]` — IndexError on the final element. A different surface (comprehension vs. loop) than the bundled paginator demo, to test the rule's generality.",
+  "hidden_bug": "adjacent_sum() iterates over every index of values and accesses values[i + 1], which is out of range on the last iteration.",
+  "expected_behavior": "adjacent_sum([1, 2, 3]) must return [3, 5] (sums of adjacent pairs), not raise.",
+  "ground_truth": "Iterate `range(len(values) - 1)` so the last element has no successor.",
+  "root_cause_file": "src/chunks.py",
+  "root_cause_line": 6,
+  "failing_test": "tests/test_chunks.py::test_adjacent_sum",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/chunks.py",
+    "description": "shrink the range bound by one",
+    "minimal": true
+  }
+}

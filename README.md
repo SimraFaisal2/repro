@@ -151,6 +151,39 @@ each with a genuine bug and a failing test:
 | `sql`        | Incorrect SQL query          |
 | `auth2`      | Authentication logic bug     |
 
+## CI/CD
+
+Every push to `main` runs a **benchmark gate** — the full 9-repo bug corpus must
+fix 100% before anything deploys. Only then are the services updated:
+
+| Target  | What ships                       | How                          |
+|---------|----------------------------------|------------------------------|
+| Render  | Backend (FastAPI + agent, Docker)| Deploy-hook `POST`           |
+| Vercel  | Frontend dashboard (Vite/React)  | `vercel deploy --prebuilt`   |
+
+Workflow: `.github/workflows/ci.yml`. The benchmark exits non-zero unless every
+corpus entry is fixed, so the gate fails the run (and skips both deploys) the
+moment the fix rate drops below 100%. The `benchmark_results.json` artifact is
+also uploaded for every run.
+
+### Secrets required
+
+Set these in **GitHub → Settings → Secrets and variables → Actions**:
+
+| Secret                  | Where to get it                                                    |
+|-------------------------|--------------------------------------------------------------------|
+| `RENDER_DEPLOY_HOOK`    | Render dashboard → service → **Settings → Deploy Hook** (URL)      |
+| `VERCEL_TOKEN`          | Vercel → Account → **Settings → Tokens**                           |
+| `VERCEL_ORG_ID`         | Vercel project → Settings (e.g. `team_…`)                          |
+| `VERCEL_PROJECT_ID`     | Vercel project → Settings (e.g. `prj_…`)                           |
+| `VITE_API_BASE`         | Backend origin, e.g. `https://repro.onrender.com` (no trailing `/`)|  
+
+> `VITE_API_BASE` is inlined at build time — set it once the backend is live.
+> Leave it unset and the dashboard calls same-origin `/api`, which is correct
+> for the single-service Docker deploy on Render.
+
+---
+
 ## Benchmark
 
 REPRO ships with a **bug-corpus benchmark** (`backend/repro/benchmark_corpus/`) — nine

@@ -19,6 +19,40 @@ import httpx
 
 from .config import cfg
 
+# ---------------------------------------------------------------------------
+# usage / cost accounting (used by the v2 benchmark to measure API cost in
+# LLM and hybrid modes; heuristic-rules mode never touches the network)
+# ---------------------------------------------------------------------------
+_usage = {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "cost_usd": 0.0}
+
+# rough per-1k-token pricing used only for estimates (USD)
+_PRICES = {
+    "openai": {"prompt": 0.15 / 1000, "completion": 0.60 / 1000},
+    "anthropic": {"prompt": 0.003 / 1000, "completion": 0.015 / 1000},
+    "ollama": {"prompt": 0.0, "completion": 0.0},  # local — no API cost
+}
+
+
+def reset_usage() -> None:
+    """Zero the per-entry usage counters (called by the benchmark runner)."""
+    global _usage
+    _usage = {"calls": 0, "prompt_tokens": 0, "completion_tokens": 0, "cost_usd": 0.0}
+
+
+def _record_usage(provider: str, prompt_tokens: int, completion_tokens: int) -> None:
+    p = _PRICES.get(provider, _PRICES["openai"])
+    _usage["calls"] += 1
+    _usage["prompt_tokens"] += int(prompt_tokens or 0)
+    _usage["completion_tokens"] += int(completion_tokens or 0)
+    _usage["cost_usd"] += (int(prompt_tokens or 0) * p["prompt"]) + \
+                           (int(completion_tokens or 0) * p["completion"])
+
+
+def usage_stats() -> dict:
+    """Current usage counters: calls, prompt/completion tokens, est. USD cost."""
+    return dict(_usage)
+
+
 SYSTEM_PROMPT = """You are REPRO, an AI software failure investigator.
 You reason ONLY over the evidence you are given (real test output, real
 stack trace, real runtime values, real source code). You never invent
@@ -101,7 +135,11 @@ class OpenAIProvider(AIProvider):
         resp = httpx.post(f"{cfg.openai_base_url}/chat/completions",
                           json=payload, headers=headers, timeout=90)
         resp.raise_for_status()
-        content = resp.json()["choices"][0]["message"]["content"]
+        data = resp.json()
+        usage = data.get("usage") or {}
+        _record_usage("openai", usage.get("prompt_tokens", 0),
+                      usage.get("completion_tokens", 0))
+        content = data["choices"][0]["message"]["content"]
         return _parse_json(content)
 
 
@@ -121,6 +159,9 @@ class AnthropicProvider(AIProvider):
                           json=payload, headers=headers, timeout=90)
         resp.raise_for_status()
         data = resp.json()
+        usage = data.get("usage") or {}
+        _record_usage("anthropic", usage.get("input_tokens", 0),
+                      usage.get("output_tokens", 0))
         content = "".join(b.get("text", "") for b in data.get("content", []))
         return _parse_json(content)
 
@@ -141,7 +182,10 @@ class OllamaProvider(AIProvider):
         }
         resp = httpx.post(f"{cfg.ollama_url}/api/chat", json=payload, timeout=180)
         resp.raise_for_status()
-        return _parse_json(resp.json()["message"]["content"])
+        data = resp.json()
+        _record_usage("ollama", data.get("prompt_eval_count", 0),
+                      data.get("eval_count", 0))
+        return _parse_json(data["message"]["content"])
 
 
 def _parse_json(content: str) -> Optional[dict]:

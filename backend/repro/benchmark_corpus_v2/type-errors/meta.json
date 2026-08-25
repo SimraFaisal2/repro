@@ -1,0 +1,21 @@
+{
+  "id": "type-errors",
+  "name": "String concatenation with an integer",
+  "category": "type-errors",
+  "class": "Type error",
+  "rule": "fallback",
+  "difficulty": "hard",
+  "modeled_on": "An f-string refactor missed one call site: `'Total: ' + count` where count is an int. The classic 'str + int' TypeError that shows up after a change from a formatting helper to string concatenation.",
+  "hidden_bug": "build_label() concatenates an integer count onto a string literal, raising TypeError at runtime instead of producing the expected label.",
+  "expected_behavior": "build_label(3) must return the string \"Total: 3\" without raising.",
+  "ground_truth": "Convert the count to a string (or use an f-string) when building the label.",
+  "root_cause_file": "src/labeler.py",
+  "root_cause_line": 6,
+  "failing_test": "tests/test_labeler.py::test_build_label",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/labeler.py",
+    "description": "coerce the int to str before concatenation",
+    "minimal": true
+  }
+}

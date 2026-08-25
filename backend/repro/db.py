@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS patches (
     reason TEXT,
     applied INTEGER DEFAULT 0,
     status TEXT DEFAULT 'proposed',
+    report_json TEXT,
     created_at REAL NOT NULL
 );
 
@@ -134,9 +135,17 @@ def init_db() -> None:
         conn = get_db()
         try:
             conn.executescript(SCHEMA)
+            _migrate(conn)
             conn.commit()
         finally:
             conn.close()
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    """Additive migrations for databases created before a column existed."""
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(patches)")}
+    if "report_json" not in cols:
+        conn.execute("ALTER TABLE patches ADD COLUMN report_json TEXT")
 
 
 def _j(v: Any) -> Optional[str]:
@@ -249,6 +258,7 @@ def get_investigation(iid: str) -> Optional[dict]:
             "SELECT * FROM verification_results WHERE investigation_id=? ORDER BY created_at", (iid,))]
         for p in d["patches"]:
             p["applied"] = bool(p["applied"])
+            p["report"] = _uj(p.pop("report_json", None))
         return d
     finally:
         conn.close()
@@ -345,7 +355,8 @@ def add_events(iid: str, events: list[dict]) -> None:
                 " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                 [(new_id(), iid, e.get("order"), e.get("event"), e.get("func"), e.get("file"),
                   e.get("line"), _j(e.get("args")), e.get("return"), e.get("exception"),
-                  e.get("exec_time"), time.time()) for e in events])
+                  (e.get("duration_ms") if e.get("duration_ms") is not None else e.get("exec_time")),
+                  time.time()) for e in events])
             conn.commit()
         finally:
             conn.close()
@@ -378,16 +389,17 @@ def add_patch(iid: str, patch: dict) -> dict:
         "reason": patch.get("reason", ""),
         "applied": int(bool(patch.get("applied", 0))),
         "status": patch.get("status", "proposed"),
+        "report_json": _j(patch.get("report")),
     }
     with _lock:
         conn = get_db()
         try:
             conn.execute(
-                "INSERT INTO patches (id,investigation_id,diff,files_changed,lines_added,lines_removed,risk,confidence,reason,applied,status,created_at)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO patches (id,investigation_id,diff,files_changed,lines_added,lines_removed,risk,confidence,reason,applied,status,report_json,created_at)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (row["id"], iid, row["diff"], row["files_changed"], row["lines_added"],
                  row["lines_removed"], row["risk"], row["confidence"], row["reason"],
-                 row["applied"], row["status"], time.time()))
+                 row["applied"], row["status"], row["report_json"], time.time()))
             conn.commit()
         finally:
             conn.close()

@@ -154,29 +154,86 @@ def git_diff(sandbox: Sandbox, branch: str) -> tuple[str, dict]:
     return diff, {"files_changed": files, "lines_added": added, "lines_removed": removed}
 
 
-def generate_patch(sandbox: Sandbox, hypothesis: dict, iid: str) -> dict | None:
-    """Apply the hypothesis' edit on an isolated branch; return the patch record."""
+def plan_patch(sandbox: Sandbox, hypothesis: dict, iid: str) -> dict | None:
+    """Compute the candidate patch (diff + stats) WITHOUT touching the sandbox.
+
+    The pipeline validates a patch *before* it is applied, so generation is
+    split into `plan_patch` (pure computation) and `apply_plan` (git commit).
+    """
     hint = hypothesis.get("patch_hint")
     edits = edits_from_hint(hint, sandbox)
     if not edits:
         return None
     branch = f"repro/fix-{iid}"
-    ensure_branch(sandbox, branch)          # baseline first — original code
-    if not apply_edits(sandbox, edits):
-        return None
-    _git(sandbox, "add", "-A")
-    _git(sandbox, "commit", "-q", "-m", f"repro: apply fix ({hypothesis.get('rule', '')})")
-    diff, stats = git_diff(sandbox, branch)
+    diff, stats = diff_from_edits(sandbox, edits)
     return {
         "diff": diff,
+        "edits": edits,
         **stats,
         "risk": hypothesis.get("risk", "MEDIUM"),
         "confidence": hypothesis.get("confidence"),
         "reason": hypothesis.get("explanation", ""),
+        "explanation": hypothesis.get("explanation", ""),
+        "root_cause": hypothesis.get("root_cause", ""),
+        "rule": hypothesis.get("rule", ""),
         "status": "proposed",
-        "applied": True,
+        "applied": False,
         "branch": branch,
     }
+
+
+def diff_from_edits(sandbox: Sandbox, edits: list[tuple[str, int, list[str]]]) -> tuple[str, dict]:
+    """Compute the unified diff + stats a set of edits would produce."""
+    import difflib
+    by_file: dict[str, list[tuple[int, list[str]]]] = {}
+    for file, lineno, new_lines in edits:
+        by_file.setdefault(file, []).append((lineno, new_lines))
+    chunks: list[str] = []
+    added = removed = 0
+    for file in sorted(by_file):
+        lines = _read_lines(sandbox, file)
+        if not lines:
+            continue
+        old = list(lines)
+        # apply edits bottom-up so line numbers stay valid
+        for lineno, new_lines in sorted(by_file[file], key=lambda e: -e[0]):
+            lines[lineno - 1:lineno] = new_lines
+        # unified_diff with lineterm="" yields newline-free lines; joining with
+        # "\n" (plus a trailing newline) produces a proper, git-applyable diff.
+        # (lineterm="\n" would only terminate header lines, mashing the content
+        # lines together and corrupting the stats.) Also normalize separators,
+        # since Windows sandboxes produce backslash paths.
+        norm = file.replace("\\", "/")
+        diff_text = "\n".join(difflib.unified_diff(
+            old, lines, fromfile=f"a/{norm}", tofile=f"b/{norm}", lineterm="")) + "\n"
+        if not diff_text.strip():
+            continue
+        chunks.append(f"diff --git a/{norm} b/{norm}\n{diff_text}")
+        for l in diff_text.splitlines():
+            if l.startswith("+") and not l.startswith("+++"):
+                added += 1
+            elif l.startswith("-") and not l.startswith("---"):
+                removed += 1
+    return "\n".join(chunks), {"files_changed": len(by_file), "lines_added": added,
+                               "lines_removed": removed}
+
+
+def apply_plan(sandbox: Sandbox, plan: dict) -> bool:
+    """Commit the planned edits onto the isolated branch (sandbox only)."""
+    branch = plan["branch"]
+    ensure_branch(sandbox, branch)          # baseline first — original code
+    if not apply_edits(sandbox, plan["edits"]):
+        return False
+    _git(sandbox, "add", "-A")
+    _git(sandbox, "commit", "-q", "-m", f"repro: apply fix ({plan.get('rule', '')})")
+    return True
+
+
+def revert_patch(sandbox: Sandbox, iid: str) -> None:
+    """Discard the sandbox fix branch entirely, returning to baseline."""
+    branch = f"repro/fix-{iid}"
+    _git(sandbox, "checkout", "-q", "main")
+    _git(sandbox, "branch", "-D", branch)
 
 
 def apply_llm_diff(sandbox: Sandbox, diff: str, iid: str) -> bool:

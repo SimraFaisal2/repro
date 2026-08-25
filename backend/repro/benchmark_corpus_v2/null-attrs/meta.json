@@ -1,0 +1,21 @@
+{
+  "id": "null-attrs",
+  "name": "Order total crashes on missing order",
+  "category": "null-handling",
+  "class": "NULL dereference",
+  "rule": "none_subscript",
+  "difficulty": "easy",
+  "modeled_on": "A lookup helper returns None for missing records and the caller subscripts the result unconditionally — the classic NULL-dereference class, in an e-commerce domain.",
+  "hidden_bug": "find_order() returns None when the order id is unknown, and order_total() subscripts that None result without a guard.",
+  "expected_behavior": "order_total() must not raise when the order is missing; it should return None.",
+  "ground_truth": "Guard the lookup result: return None when the order is missing instead of subscripting it.",
+  "root_cause_file": "src/orders.py",
+  "root_cause_line": 14,
+  "failing_test": "tests/test_orders.py::test_order_total_missing",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/orders.py",
+    "description": "insert a None guard before the subscript",
+    "minimal": true
+  }
+}

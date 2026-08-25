@@ -1,0 +1,21 @@
+{
+  "id": "state-transitions",
+  "name": "Traffic light skips the yellow state",
+  "category": "state-transitions",
+  "class": "State machine bug",
+  "rule": "fallback",
+  "difficulty": "hard",
+  "modeled_on": "A state machine's transition table drops a state (green -> red, skipping yellow). Real-world analogue: a workflow/order-state machine where one transition edge was wired to the wrong destination.",
+  "hidden_bug": "TrafficLight.next() moves directly from green to red, skipping the yellow state that the protocol requires.",
+  "expected_behavior": "The light must cycle green -> yellow -> red -> green.",
+  "ground_truth": "Transition from green to yellow (adding the missing state) before red.",
+  "root_cause_file": "src/light.py",
+  "root_cause_line": 9,
+  "failing_test": "tests/test_light.py::test_cycle_includes_yellow",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/light.py",
+    "description": "route green -> yellow instead of green -> red",
+    "minimal": true
+  }
+}

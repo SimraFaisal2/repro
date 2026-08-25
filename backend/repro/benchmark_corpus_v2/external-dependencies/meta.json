@@ -1,0 +1,21 @@
+{
+  "id": "external-dependencies",
+  "name": "Assumes a dependency returns a list, it returns a generator",
+  "category": "external-dependencies",
+  "class": "Wrong assumption about dependency",
+  "rule": "fallback",
+  "difficulty": "hard",
+  "modeled_on": "Code indexes a value returned by an external library as if it were a list, but the library returns a generator. Real-world analogue: code written against an old version of a dependency's API, or against docs that promise a list, which now streams a lazy iterator.",
+  "hidden_bug": "first_line() subscripts the stream returned by an external library, but the library returns a generator, which is not subscriptable.",
+  "expected_behavior": "first_line(stream) must return the first line without raising.",
+  "ground_truth": "Do not assume list-ness: consume the generator (e.g. next(stream)) instead of subscripting it.",
+  "root_cause_file": "src/reader.py",
+  "root_cause_line": 6,
+  "failing_test": "tests/test_reader.py::test_first_line_generator",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/reader.py",
+    "description": "consume the generator instead of subscripting",
+    "minimal": true
+  }
+}

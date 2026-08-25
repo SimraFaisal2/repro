@@ -1,0 +1,21 @@
+{
+  "id": "incorrect-api-usage",
+  "name": "In-place sort treated as returning the sorted list",
+  "category": "incorrect-api-usage",
+  "class": "API misuse",
+  "rule": "fallback",
+  "difficulty": "hard",
+  "modeled_on": "`list.sort()` sorts in place and returns None, but the code assigns its return value and returns it. Real-world analogue: developers mixing up `sorted()` (returns a new list) with `.sort()` (in-place) — a staple interview- and code-review-failure.",
+  "hidden_bug": "sort_desc() returns the result of `values.sort(reverse=True)`, which is None, instead of returning the sorted list.",
+  "expected_behavior": "sort_desc([3, 1, 2]) must return [3, 2, 1].",
+  "ground_truth": "Sort in place and return `values`, or use `sorted(values, reverse=True)`.",
+  "root_cause_file": "src/sorter.py",
+  "root_cause_line": 6,
+  "failing_test": "tests/test_sorter.py::test_sort_desc",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/sorter.py",
+    "description": "return the list after in-place sort",
+    "minimal": true
+  }
+}

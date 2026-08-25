@@ -1,0 +1,21 @@
+{
+  "id": "incorrect-conditions",
+  "name": "Boundary condition uses strict > instead of >=",
+  "category": "incorrect-conditions",
+  "class": "Logic error",
+  "rule": "fallback",
+  "difficulty": "hard",
+  "modeled_on": "An eligibility check uses `age > 18` where the spec is `age >= 18` — an off-by-one in a comparison rather than an index. Real-world analogue: policy logic where the boundary value itself must be included.",
+  "hidden_bug": "is_adult() uses a strict greater-than, so a user exactly at the boundary (18) is incorrectly rejected.",
+  "expected_behavior": "is_adult(18) must return True; the boundary age must be included.",
+  "ground_truth": "Change the comparison to `age >= 18` so the boundary value is included.",
+  "root_cause_file": "src/eligibility.py",
+  "root_cause_line": 6,
+  "failing_test": "tests/test_eligibility.py::test_boundary_is_adult",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/eligibility.py",
+    "description": "use >= instead of > at the boundary",
+    "minimal": true
+  }
+}

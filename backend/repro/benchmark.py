@@ -31,7 +31,7 @@ from .config import REPRO_ROOT, cfg, ensure_dirs
 from .demo import _force_rmtree
 
 CORPUS_DIR = Path(__file__).resolve().parent / "benchmark_corpus"
-TERMINAL = {"fixed", "failed", "no-failure"}
+TERMINAL = {"fixed", "failed", "no-failure", "needs-approval"}
 DEFAULT_DB = cfg.data_dir / "benchmark.db"
 
 

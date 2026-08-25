@@ -22,7 +22,7 @@ import {
   X,
 } from "lucide-react";
 import { api } from "../api";
-import type { EventPayload, Investigation as Inv, TraceFrame } from "../types";
+import type { DebugStateMachine, EventPayload, Investigation as Inv, PatchReport, TraceData, TraceFrame } from "../types";
 import { STATUS_COLOR, STATUS_LABEL } from "../types";
 import { Panel, Spinner } from "../components/Panel";
 import TraceView from "../components/TraceView";
@@ -64,7 +64,7 @@ export default function Investigation() {
   const { id } = useParams<{ id: string }>();
   const [inv, setInv] = useState<Inv | null>(null);
   const [project, setProject] = useState<any>(null);
-  const [liveTrace, setLiveTrace] = useState<TraceFrame[] | null>(null);
+  const [liveTrace, setLiveTrace] = useState<TraceData | TraceFrame[] | null>(null);
   const [liveHyp, setLiveHyp] = useState<any>(null);
   const [livePatch, setLivePatch] = useState<any>(null);
   const [liveVer, setLiveVer] = useState<any>(null);
@@ -129,9 +129,12 @@ export default function Investigation() {
 
   const status = inv?.status || "created";
   const trace = liveTrace || inv?.summary?._trace || null;
+  const traceFrames = Array.isArray(trace) ? trace : trace?.frames || [];
+  const traceSlice = !Array.isArray(trace) ? trace?.slice : undefined;
   const hyp = liveHyp || inv?.summary?._hypothesis || null;
   const patch = livePatch || inv?.patches?.[inv.patches.length - 1] || null;
   const verification = liveVer || inv?.verifications?.[inv.verifications.length - 1] || null;
+  const debug: DebugStateMachine | null = (inv?.summary as any)?._debug || null;
   const failures = inv?.failures || [];
   const running = ["running", "investigating", "created"].includes(status);
   const failingModule = failures[0]?.file ? failures[0].file.replace(/\\/g, "/").replace(/\.py$/, "").replace(/\//g, ".") : null;
@@ -143,8 +146,16 @@ export default function Investigation() {
       return;
     }
     setConfirming(false);
+    const needsApproval = status === "needs-approval";
+    if (needsApproval && !window.confirm(
+      "This is a HIGH-risk patch. It passed verification but carries elevated " +
+      "risk (large scope, unexpected files, or a risky failure class).\n\n" +
+      "Apply it to your repository on a git branch anyway?"
+    )) {
+      return;
+    }
     try {
-      const res = await api.applyPatch(id, true);
+      const res = await api.applyPatch(id, true, needsApproval);
       setToast(`Applied on branch ${res.branch}`);
       refresh();
     } catch (e: any) {
@@ -182,8 +193,8 @@ export default function Investigation() {
   }, [hyp]);
 
   const firstFailure = failures[0];
-  const failureSource = firstFailure?.file && trace?.length
-    ? (trace.find((t: TraceFrame) => t.file === firstFailure.file)?.source ?? null)
+  const failureSource = firstFailure?.file && traceFrames.length
+    ? (traceFrames.find((t: TraceFrame) => t.file === firstFailure.file)?.source ?? null)
     : null;
 
   return (
@@ -316,8 +327,17 @@ export default function Investigation() {
           )}
 
           {/* runtime trace */}
-          <Panel title="Runtime trace" right={trace ? <span className="mono text-[11px] text-faint">{trace.length} frames</span> : undefined}>
-            {trace ? (
+          <Panel
+            title="Runtime trace"
+            right={traceFrames.length ? (
+              <span className="mono text-[11px] text-faint">
+                {traceFrames.length} frame(s)
+                {traceSlice?.frames ? ` · slice ${traceSlice.frames}` : ""}
+                {traceSlice?.max_depth != null ? ` · depth ${traceSlice.max_depth}` : ""}
+              </span>
+            ) : undefined}
+          >
+            {traceFrames.length ? (
               <TraceView trace={trace} />
             ) : running ? (
               <Spinner label="capturing execution trace…" />
@@ -388,7 +408,9 @@ export default function Investigation() {
             title="Proposed fix"
             right={patch && (
               <span className="flex items-center gap-3 mono text-[11px] text-faint">
-                {patch.risk && <span>risk: {patch.risk.toLowerCase()}</span>}
+                <span className={RISK_STYLE[patch.risk?.toUpperCase()] || RISK_STYLE.MEDIUM}>
+                  risk: {patch.risk?.toLowerCase()}
+                </span>
                 {patch.confidence != null && <span>conf: {(patch.confidence * 100).toFixed(0)}%</span>}
                 <span>+{patch.lines_added}/-{patch.lines_removed}</span>
               </span>
@@ -405,7 +427,14 @@ export default function Investigation() {
                   {inv?.branch && <span className="text-good">· applied to repo</span>}
                   {!inv?.branch && <span className="text-faint">· verified in sandbox</span>}
                 </div>
+                <PatchReportView report={patch.report || null} checks={patch.checks || []} />
                 <DiffView diff={patch.diff} />
+                {status === "needs-approval" && !inv?.branch && (
+                  <div className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2.5 text-xs text-warn">
+                    This HIGH-risk patch passed verification but requires explicit human
+                    approval before it can be applied. Review the diff and safety checks above.
+                  </div>
+                )}
                 {!inv?.branch && !confirming && (
                   <div className="flex gap-2">
                     <button className="btn-good" onClick={() => applyFix()} disabled={running}>
@@ -416,7 +445,11 @@ export default function Investigation() {
                 )}
                 {!inv?.branch && confirming && (
                   <div className="flex items-center gap-2 text-xs">
-                    <span className="text-muted">This creates branch <span className="mono text-accent">repro/fix-{id}</span> in the project checkout and commits the fix.</span>
+                    {status === "needs-approval" ? (
+                      <span className="text-warn">HIGH-risk override — this applies a patch that requires explicit human approval.</span>
+                    ) : (
+                      <span className="text-muted">This creates branch <span className="mono text-accent">repro/fix-{id}</span> in the project checkout and commits the fix.</span>
+                    )}
                     <button className="btn-good" onClick={() => applyFix(true)}>
                       <GitBranch size={13} /> Confirm apply
                     </button>
@@ -504,12 +537,185 @@ export default function Investigation() {
             )}
           </Panel>
 
+          {/* autonomous debugging state machine */}
+          <Panel
+            title="Debug state machine"
+            right={debug ? (
+              <span className="mono text-[11px] text-faint">
+                {debug.state} · {debug.iteration}/{debug.budget}
+              </span>
+            ) : undefined}
+          >
+            {debug ? (
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center gap-2 text-[11px]">
+                  <span className={`rounded-full border px-2 py-0.5 mono ${STATE_STYLE[debug.state] || "border-border text-muted"}`}>
+                    {debug.state}
+                  </span>
+                  <span className="rounded-full border border-border text-muted mono px-2 py-0.5">
+                    strategy: {debug.strategy}
+                  </span>
+                  <span className="rounded-full border border-border text-muted mono px-2 py-0.5">
+                    iterations: {debug.iteration}/{debug.budget}
+                  </span>
+                  <span className="rounded-full border border-border text-muted mono px-2 py-0.5">
+                    evidence sets: {debug.evidence_sets}
+                  </span>
+                </div>
+                {debug.termination && (
+                  <div className="rounded-md border border-bad/30 bg-bad/5 px-3 py-2 text-[11.5px] text-bad">
+                    ⛔ {debug.termination}
+                  </div>
+                )}
+                {debug.loops.length > 0 && (
+                  <details className="text-[11.5px]">
+                    <summary className="cursor-pointer text-warn hover:text-ink flex items-center gap-1">
+                      <AlertTriangle size={12} /> {debug.loops.length} loop(s) detected
+                    </summary>
+                    <ul className="mt-2 space-y-1.5">
+                      {debug.loops.map((l, i) => (
+                        <li key={i} className="flex items-start gap-1.5">
+                          <span className="mono text-warn">{l.type}</span>
+                          <span className="text-faint">— {l.detail}</span>
+                          <span className="mono text-faint ml-auto shrink-0">iter {l.iteration}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+                {debug.hypotheses.length > 0 && (
+                  <details className="text-[11.5px]">
+                    <summary className="cursor-pointer text-faint hover:text-ink flex items-center gap-1">
+                      <Microscope size={12} /> hypotheses attempted: {debug.hypotheses.length}
+                    </summary>
+                    <ul className="mt-2 space-y-1.5">
+                      {debug.hypotheses.map((h, i) => (
+                        <li key={i} className="flex items-start gap-1.5">
+                          <span className={`mono shrink-0 ${h.result === "tried" ? "text-accent" : "text-faint"}`}>{h.result}</span>
+                          <span className="text-ink/75">{h.rule}: {h.root_cause}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+                {debug.patches.length > 0 && (
+                  <details className="text-[11.5px]">
+                    <summary className="cursor-pointer text-faint hover:text-ink flex items-center gap-1">
+                      <Wand2 size={12} /> patches attempted: {debug.patches.length}
+                    </summary>
+                    <ul className="mt-2 space-y-1.5">
+                      {debug.patches.map((p, i) => (
+                        <li key={i} className="flex items-start gap-1.5">
+                          <span className={`mono shrink-0 ${RESULT_STYLE[p.result] || "text-faint"}`}>{p.result}</span>
+                          <span className="text-ink/75">{p.rule}</span>
+                          <span className="text-faint ml-auto shrink-0 mono">
+                            risk {p.risk} · +{p.lines_added}/-{p.lines_removed}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+                {debug.hypotheses.length === 0 && debug.patches.length === 0 && (
+                  <p className="text-xs text-faint">No hypotheses or patches recorded yet.</p>
+                )}
+              </div>
+            ) : running ? (
+              <Spinner label="running state machine…" />
+            ) : (
+              <p className="text-xs text-faint">No state machine data for this investigation.</p>
+            )}
+          </Panel>
+
           {/* agent activity */}
           <Panel title="Agent activity" right={running ? <Spinner /> : <span className="mono text-[11px] text-faint">{steps.length} steps</span>}>
             <ActivityLog steps={steps} live={running} />
           </Panel>
         </div>
       </div>
+    </div>
+  );
+}
+
+const RISK_STYLE: Record<string, string> = {
+  LOW: "text-good",
+  MEDIUM: "text-warn",
+  HIGH: "text-bad",
+};
+
+const STATE_STYLE: Record<string, string> = {
+  observe: "border-accent/40 text-accent bg-accent/10",
+  reproduce: "border-accent/40 text-accent bg-accent/10",
+  investigate: "border-vio/40 text-vio bg-vio/10",
+  hypothesize: "border-vio/40 text-vio bg-vio/10",
+  rank: "border-vio/40 text-vio bg-vio/10",
+  patch: "border-warn/40 text-warn bg-warn/10",
+  verify: "border-warn/40 text-warn bg-warn/10",
+  "analyze-failure": "border-bad/40 text-bad bg-bad/10",
+  reassess: "border-bad/40 text-bad bg-bad/10",
+  "collect-evidence": "border-bad/40 text-bad bg-bad/10",
+  success: "border-good/40 text-good bg-good/10",
+  terminated: "border-bad/40 text-bad bg-bad/10",
+};
+
+const RESULT_STYLE: Record<string, string> = {
+  tried: "text-accent",
+  "rejected-static": "text-bad",
+  unverified: "text-warn",
+  rejected: "text-bad",
+};
+
+function PatchReportView({ report, checks }: { report: PatchReport | null; checks: any[] }) {
+  const allChecks = report?.checks?.length ? report.checks : checks;
+  const passed = allChecks.filter((c) => c.status === "pass" || c.status === "skip").length;
+  const regress = report?.regression_status === "new-failures";
+  return (
+    <div className="rounded-md border border-border bg-panel2/40 p-3 space-y-2.5">
+      <div className="flex flex-wrap items-center gap-2 text-[11px]">
+        <span className={`mono ${regress ? "text-bad" : "text-good"}`}>
+          regression: {report?.regression_status || "—"}
+        </span>
+        <span className="mono text-faint">safety checks {passed}/{allChecks.length}</span>
+        {report?.tests_affected && report.tests_affected.length > 0 && (
+          <span className="text-faint">
+            tests affected: {report.tests_affected.length}
+          </span>
+        )}
+      </div>
+      {report && (
+        <div className="grid grid-cols-2 gap-2 text-[11px]">
+          <div>
+            <span className="text-faint">before: </span>
+            <span className="mono text-good">{report.tests_before?.passed ?? 0}p</span>
+            <span className="mono text-bad">/{report.tests_before?.failed ?? 0}f</span>
+          </div>
+          <div>
+            <span className="text-faint">after: </span>
+            <span className="mono text-good">{report.tests_after?.passed ?? 0}p</span>
+            <span className="mono text-bad">/{report.tests_after?.failed ?? 0}f</span>
+          </div>
+        </div>
+      )}
+      <details className="text-[11px]">
+        <summary className="cursor-pointer text-faint hover:text-ink flex items-center gap-1">
+          <ChevronDown size={12} /> {allChecks.length} safety checks
+        </summary>
+        <ul className="mt-2 space-y-1">
+          {allChecks.map((c, i) => (
+            <li key={c.id || i} className="flex items-start gap-1.5">
+              {c.status === "pass" ? (
+                <Check size={12} className="mt-0.5 shrink-0 text-good" />
+              ) : c.status === "fail" ? (
+                <X size={12} className="mt-0.5 shrink-0 text-bad" />
+              ) : (
+                <CircleSlash size={12} className="mt-0.5 shrink-0 text-faint" />
+              )}
+              <span className="text-ink/75">{c.name}</span>
+              <span className="text-faint">— {c.detail}</span>
+            </li>
+          ))}
+        </ul>
+      </details>
     </div>
   );
 }

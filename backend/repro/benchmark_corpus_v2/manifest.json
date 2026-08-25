@@ -1,0 +1,18 @@
+{
+  "corpus_version": "2026-08-v1",
+  "description": "REPRO benchmark v2 corpus — measures general debugging ability across 12 failure categories. Includes deliberately hard entries that the deterministic rule engine cannot fix, so results honestly include failures.",
+  "entries": [
+    {"id": "null-attrs", "category": "null-handling", "difficulty": "easy"},
+    {"id": "type-errors", "category": "type-errors", "difficulty": "hard"},
+    {"id": "incorrect-conditions", "category": "incorrect-conditions", "difficulty": "hard"},
+    {"id": "off-by-one", "category": "off-by-one", "difficulty": "easy"},
+    {"id": "incorrect-api-usage", "category": "incorrect-api-usage", "difficulty": "hard"},
+    {"id": "sql-errors", "category": "sql-errors", "difficulty": "easy"},
+    {"id": "state-transitions", "category": "state-transitions", "difficulty": "hard"},
+    {"id": "data-transformation", "category": "data-transformation", "difficulty": "hard"},
+    {"id": "exception-handling", "category": "exception-handling", "difficulty": "hard"},
+    {"id": "concurrency", "category": "concurrency", "difficulty": "hard"},
+    {"id": "external-dependencies", "category": "external-dependencies", "difficulty": "hard"},
+    {"id": "regression", "category": "regression", "difficulty": "hard"}
+  ]
+}

@@ -48,7 +48,7 @@ function phaseOf(msg: string): string | null {
   return null;
 }
 
-const TERMINAL = new Set(["fixed", "failed", "no-failure"]);
+const TERMINAL = new Set(["fixed", "failed", "no-failure", "needs-approval"]);
 
 const DEMOS = [
   { key: "auth", label: "Null / None handling" },
@@ -179,6 +179,7 @@ export default function Landing() {
   const done = demo !== null && TERMINAL.has(demo.status);
   const fixed = demo?.status === "fixed";
   const failed = demo?.status === "failed";
+  const needsApproval = demo?.status === "needs-approval";
 
   return (
     <div className="max-w-3xl mx-auto pt-16 pb-24">
@@ -242,12 +243,14 @@ export default function Landing() {
                   ? "border-good/40 bg-good/10 text-good"
                   : failed
                   ? "border-bad/40 bg-bad/10 text-bad"
+                  : needsApproval
+                  ? "border-warn/40 bg-warn/10 text-warn"
                   : "border-border bg-panel text-muted"
               }`}
             >
               <div className="flex flex-wrap items-center gap-3">
                 <span className="font-semibold">
-                  {fixed ? "✓ Fixed — verified in the sandbox" : failed ? "✗ Not fixed — the agent stopped and explained why" : "No failure detected"}
+                  {fixed ? "✓ Fixed — verified in the sandbox" : failed ? "✗ Not fixed — the agent stopped and explained why" : needsApproval ? "⚠ High-risk patch — awaiting human approval" : "No failure detected"}
                 </span>
                 <span className={`ml-auto inline-flex items-center gap-1.5 text-[11px] rounded-full border px-2 py-0.5 ${STATUS_COLOR[demo.status] || STATUS_COLOR.created}`}>
                   {STATUS_LABEL[demo.status] || demo.status}
@@ -270,6 +273,10 @@ export default function Landing() {
                   <span>
                     patch <span className="text-good">+{demo.patch.lines_added}</span>
                     <span className="text-bad">-{demo.patch.lines_removed}</span> · {demo.patch.files_changed} file(s)
+                    {demo.patch.risk && <span className={`ml-2 mono ${demo.patch.risk === "HIGH" ? "text-bad" : demo.patch.risk === "MEDIUM" ? "text-warn" : "text-good"}`}>risk: {demo.patch.risk.toLowerCase()}</span>}
+                    {demo.patch.report?.regression_status && demo.patch.report.regression_status !== "none" && (
+                      <span className="ml-2 mono text-bad">regression: {demo.patch.report.regression_status}</span>
+                    )}
                   </span>
                 )}
               </div>

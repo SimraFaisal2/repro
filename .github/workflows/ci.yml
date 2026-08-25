@@ -1,0 +1,113 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: repro-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ------------------------------------------------------------------ gate
+  benchmark-gate:
+    name: Benchmark gate (fix rate must be 100%)
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      # Keep all runtime data out of the checkout on CI.
+      REPRO_DATA_DIR: ${{ runner.temp }}/repro-data
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements.txt
+
+      - name: Run bug-corpus benchmark
+        working-directory: backend
+        run: |
+          # Exit code is 0 only when every entry is fixed — the gate itself.
+          python -m repro.benchmark \
+            --json ../benchmark_results.json \
+            --db "$RUNNER_TEMP/repro-benchmark.db"
+
+      - name: Verify 100% fix rate
+        working-directory: backend
+        run: |
+          python - <<'EOF'
+          import json
+          d = json.load(open("../benchmark_results.json"))
+          print(f"fix rate: {d['fixed']}/{d['total']} = {d['fix_rate']:.0%}")
+          for r in d["results"]:
+              print(f"  {r['id']:<18} {r['status']:<10} {r['duration_s']}s")
+          assert d["fixed"] == d["total"], f"gate failed: {d['fixed']}/{d['total']}"
+          EOF
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark_results.json
+
+  # ------------------------------------------------------------ deploys
+  deploy-render:
+    name: Deploy backend → Render
+    needs: benchmark-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render deploy hook
+        if: ${{ secrets.RENDER_DEPLOY_HOOK != '' }}
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+
+      - name: Skip notice (no hook configured)
+        if: ${{ secrets.RENDER_DEPLOY_HOOK == '' }}
+        run: |
+          echo "::warning::RENDER_DEPLOY_HOOK not set — backend was not deployed."
+          echo "Add it under Settings → Secrets → Actions (Render → Settings → Deploy Hook)."
+
+  deploy-vercel:
+    name: Deploy frontend → Vercel
+    needs: benchmark-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      # Points the built dashboard at the hosted backend; falls back to
+      # same-origin /api when unset (the single-service Docker deploy).
+      VITE_API_BASE: ${{ secrets.VITE_API_BASE }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Pull Vercel project settings
+        working-directory: frontend
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build for production
+        working-directory: frontend
+        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to production
+        working-directory: frontend
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

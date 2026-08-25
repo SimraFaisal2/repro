@@ -1,0 +1,21 @@
+{
+  "id": "regression",
+  "name": "Empty-input guard removed in a refactor",
+  "category": "regression",
+  "class": "Regression bug",
+  "rule": "fallback",
+  "difficulty": "hard",
+  "modeled_on": "A previously-handled edge case (empty input) is no longer guarded after a refactor — the empty-input check was dropped and the function now divides by zero. Real-world analogue: a 'simplification' commit that deletes an early return and reintroduces a crash the codebase had already fixed once.",
+  "hidden_bug": "average() no longer guards against an empty list; the guard was removed in a refactor, so average([]) raises ZeroDivisionError.",
+  "expected_behavior": "average([]) must return 0.0 (the edge case previously handled).",
+  "ground_truth": "Restore the empty-input guard: return 0.0 when values is empty.",
+  "root_cause_file": "src/stats.py",
+  "root_cause_line": 6,
+  "failing_test": "tests/test_stats.py::test_average_empty",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/stats.py",
+    "description": "restore the empty-input guard",
+    "minimal": true
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "id": "exception-handling",
+  "name": "Broad except swallows a real failure",
+  "category": "exception-handling",
+  "class": "Exception handling bug",
+  "rule": "fallback",
+  "difficulty": "hard",
+  "modeled_on": "A bare `except Exception` catches a genuine failure and returns None, hiding the error. Real-world analogue: a fetch helper that swallows network/parsing errors and returns None, so callers can't tell a missing record from a broken backend.",
+  "hidden_bug": "fetch_json() wraps the network call in `except Exception: return None`, so when the underlying client raises (e.g. HTTP 500, parse error), the failure is silently converted to None.",
+  "expected_behavior": "fetch_json() must propagate the underlying exception instead of swallowing it.",
+  "ground_truth": "Remove the broad except (or re-raise) so real failures are not silently turned into None.",
+  "root_cause_file": "src/fetcher.py",
+  "root_cause_line": 8,
+  "failing_test": "tests/test_fetcher.py::test_fetch_propagates_errors",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/fetcher.py",
+    "description": "stop swallowing the underlying exception",
+    "minimal": true
+  }
+}

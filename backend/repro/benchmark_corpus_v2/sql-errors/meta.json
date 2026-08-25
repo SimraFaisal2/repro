@@ -1,0 +1,21 @@
+{
+  "id": "sql-errors",
+  "name": "Query references a column that does not exist",
+  "category": "sql-errors",
+  "class": "SQL schema drift",
+  "rule": "sql_column_fix",
+  "difficulty": "easy",
+  "modeled_on": "A query filters on `sku_code`, but the table defines `sku` — a renamed column that one raw SQL statement missed. Real-world analogue: a migration renames a column and one stale query keeps raising `no such column`.",
+  "hidden_bug": "find_by_sku() executes `SELECT ... WHERE sku_code = ?`, but the products table has no `sku_code` column (it is `sku`), so every lookup raises an OperationalError.",
+  "expected_behavior": "find_by_sku() must return the row whose sku matches, without raising.",
+  "ground_truth": "Reference the column that actually exists in the schema (`sku`, not `sku_code`).",
+  "root_cause_file": "src/store.py",
+  "root_cause_line": 21,
+  "failing_test": "tests/test_store.py::test_find_by_sku",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/store.py",
+    "description": "swap the stale column name for the real one",
+    "minimal": true
+  }
+}

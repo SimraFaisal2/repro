@@ -1,0 +1,21 @@
+{
+  "id": "data-transformation",
+  "name": "Aggregation sums the wrong field",
+  "category": "data-transformation",
+  "class": "Data transformation bug",
+  "rule": "fallback",
+  "difficulty": "hard",
+  "modeled_on": "A revenue rollup sums `units` where it should sum `amount` — a wrong-field aggregation that produces plausible-but-wrong numbers. Real-world analogue: analytics pipelines silently reporting the wrong metric because one mapping key was swapped.",
+  "hidden_bug": "revenue_by_region() adds `s[\"units\"]` to the running total instead of `s[\"amount\"]`, so revenue figures are wrong.",
+  "expected_behavior": "revenue_by_region() must sum the amount per region, not the unit count.",
+  "ground_truth": "Accumulate `s[\"amount\"]` instead of `s[\"units\"]`.",
+  "root_cause_file": "src/analytics.py",
+  "root_cause_line": 8,
+  "failing_test": "tests/test_analytics.py::test_revenue_by_region",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/analytics.py",
+    "description": "sum the amount field instead of units",
+    "minimal": true
+  }
+}

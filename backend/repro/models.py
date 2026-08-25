@@ -91,8 +91,10 @@ class Patch(BaseModel):
     risk: str = "MEDIUM"
     confidence: Optional[float] = None
     reason: str = ""
-    status: str = "proposed"
+    status: str = "proposed"     # proposed | needs-approval | rejected | applied
     applied: bool = False
+    checks: list[dict] = []
+    report: Optional[dict] = None
 
 
 class VerificationOut(BaseModel):

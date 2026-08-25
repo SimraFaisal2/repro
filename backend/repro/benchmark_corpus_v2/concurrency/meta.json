@@ -1,0 +1,21 @@
+{
+  "id": "concurrency",
+  "name": "Unlocked counter loses increments under threads",
+  "category": "concurrency",
+  "class": "Race condition",
+  "rule": "fallback",
+  "difficulty": "hard",
+  "modeled_on": "A shared counter is incremented from multiple threads without a lock; `self.value += 1` is not atomic, so increments are lost. Real-world analogue: shared metrics/cache counters in threaded servers that drift from the true count under load.",
+  "hidden_bug": "Counter.increment() does `self.value += 1` with no lock, so concurrent increments race and the final value is less than the number of increments.",
+  "expected_behavior": "After N increments across threads, counter.value must equal exactly N.",
+  "ground_truth": "Protect the increment with a lock (or use an atomic operation) so no increment is lost.",
+  "root_cause_file": "src/counter.py",
+  "root_cause_line": 15,
+  "failing_test": "tests/test_counter.py::test_concurrent_increments",
+  "passing_tests": 1,
+  "expected_patch": {
+    "file": "src/counter.py",
+    "description": "guard the increment with a lock",
+    "minimal": true
+  }
+}

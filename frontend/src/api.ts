@@ -60,11 +60,11 @@ export const api = {
   getInvestigation: (id: string) =>
     fetch(`${BASE}/investigations/${id}`).then((r) => j<Investigation>(r)),
 
-  applyPatch: (id: string, confirm: boolean) =>
+  applyPatch: (id: string, confirm: boolean, approveRisk = false) =>
     fetch(`${BASE}/investigations/${id}/apply`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ confirm }),
+      body: JSON.stringify({ confirm, approve_risk: approveRisk }),
     }).then((r) => j<any>(r)),
 
   verify: (id: string) =>

@@ -22,6 +22,11 @@ class Config:
     # Execution guardrails
     exec_timeout: int = int(_env("REPRO_TIMEOUT", "120"))        # seconds per command
     max_attempts: int = int(_env("REPRO_MAX_ATTEMPTS", "3"))     # autonomous repair attempts
+    debug_budget: int = int(_env("REPRO_DEBUG_BUDGET", "8"))     # max state-machine iterations
+    # Benchmark strategy mode: "rules" (deterministic only), "llm" (LLM only)
+    # or "hybrid" (rules first, escalate to LLM). Drives the state-machine
+    # strategy ladder in agent.run().
+    strategy_mode: str = _env("REPRO_STRATEGY_MODE", "hybrid")
     use_docker: bool = _env("REPRO_USE_DOCKER", "").lower() in ("1", "true", "yes")
     install_deps: bool = _env("REPRO_INSTALL_DEPS", "1").lower() in ("1", "true", "yes")
 
@@ -33,6 +38,21 @@ class Config:
     anthropic_model: str = _env("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
     ollama_url: str = _env("OLLAMA_URL", "http://localhost:11434")
     ollama_model: str = _env("OLLAMA_MODEL", "qwen2.5-coder:7b")
+
+
+def strategy_ladder(mode: str | None = None) -> list[str]:
+    """The state-machine strategy ladder for a benchmark mode.
+
+    - rules:  deterministic rule engine only (never touches the network)
+    - llm:    LLM provider only (skips the rule engine)
+    - hybrid: rules first, escalating to LLM / deep-evidence
+    """
+    mode = (mode or cfg.strategy_mode or "hybrid").lower()
+    if mode == "rules":
+        return ["rules", "terminate"]
+    if mode == "llm":
+        return ["llm", "deep-evidence", "terminate"]
+    return ["rules", "llm", "deep-evidence", "terminate"]
 
 
 cfg = Config()

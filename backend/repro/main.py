@@ -63,7 +63,7 @@ async def api_prefix_rewrite(request: Request, call_next):
 
 FRONTEND_DIST = REPRO_ROOT / "frontend" / "dist"
 
-TERMINAL = {"fixed", "failed", "no-failure"}
+TERMINAL = {"fixed", "failed", "no-failure", "needs-approval"}
 
 
 # ------------------------------------------------------------------ health
@@ -250,7 +250,11 @@ def investigation_report(iid: str) -> str:
 
 @app.post("/investigations/{iid}/apply")
 def apply_patch(iid: str, payload: dict) -> dict:
-    """Apply the latest patch to the user's checkout — requires explicit confirm."""
+    """Apply the latest patch to the user's checkout — requires explicit confirm.
+
+    High-risk (needs-approval) patches additionally require an explicit
+    `approve_risk=true` flag — the safety pipeline never auto-applies them.
+    """
     inv = db.get_investigation(iid)
     if not inv:
         raise HTTPException(404, "investigation not found")
@@ -261,6 +265,9 @@ def apply_patch(iid: str, payload: dict) -> dict:
         raise HTTPException(400, "confirmation required — set confirm=true to apply the patch")
     proj = db.get_project(inv["project_id"])
     last = patches[-1]
+    if last.get("status") == "needs-approval" and not payload.get("approve_risk"):
+        raise HTTPException(400, "this HIGH-risk patch requires explicit human approval — "
+                                  "set approve_risk=true to confirm you have reviewed it")
 
     branch = f"repro/fix-{iid}"
     root = Path(proj["local_path"])

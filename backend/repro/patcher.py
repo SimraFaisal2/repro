@@ -101,15 +101,155 @@ def edits_from_hint(hint: dict | None, sandbox: Sandbox) -> list[tuple[str, int,
             return None
         return [(file, line, [left + "==" + new_right])]
 
+    if rule == "str_concat_type":
+        var, side = hint.get("var"), hint.get("side")
+        if not var:
+            return None
+        if side == "left":
+            new = re.sub(rf"\b{re.escape(var)}\s*\+", f"str({var}) +", failing, count=1)
+        else:
+            new = re.sub(rf"\+\s*{re.escape(var)}\b", f"+ str({var})", failing, count=1)
+        if new == failing:
+            return None
+        return [(file, line, [new])]
+
+    if rule == "not_subscriptable_iter":
+        var = hint.get("var")
+        if not var:
+            return None
+        new = re.sub(rf"\b{re.escape(var)}\s*\[[^\]]*\]", f"next(iter({var}))", failing, count=1)
+        if new == failing:
+            return None
+        return [(file, line, [new])]
+
+    if rule == "inplace_mutator_return":
+        target, mut = hint.get("target"), hint.get("mutator")
+        if not target or not mut:
+            return None
+        indent = re.match(r"^(\s*)", failing).group(1)
+        call = f"{indent}{target}.{mut}({hint.get('args', '')})"
+        return [(file, line, [call, f"{indent}return {target}"])]
+
+    if rule == "boundary_comparison":
+        old_op, new_op, literal = hint.get("old_op"), hint.get("new_op"), hint.get("literal")
+        if not old_op or not new_op or literal is None:
+            return None
+        pattern = rf"{re.escape(old_op)}(?![=])\s*{re.escape(str(literal))}\b"
+        new = re.sub(pattern, f"{new_op} {literal}", failing, count=1)
+        if new == failing:
+            return None
+        return [(file, line, [new])]
+
+    if rule == "empty_guard_zerodiv":
+        var = hint.get("var")
+        if not var:
+            return None
+        indent = re.match(r"^(\s*)", failing).group(1)
+        guard = [f"{indent}if not {var}:", f"{indent}    return {hint.get('default', 0)!r}"]
+        return [(file, line, guard + [failing])]
+
+    if rule == "broad_except_swallow":
+        indent = re.match(r"^(\s*)", failing).group(1)
+        if indent == "":
+            return None
+        return [(file, line, [f"{indent}raise"])]
+
+    if rule == "aggregation_field":
+        old_key, new_key = hint.get("old_key"), hint.get("new_key")
+        if not old_key or not new_key:
+            return None
+        new = re.sub(rf"\[(['\"]){re.escape(old_key)}\1\]", f"['{new_key}']", failing, count=1)
+        if new == failing:
+            return None
+        return [(file, line, [new])]
+
+    if rule == "state_transition_edges":
+        attr = hint.get("attr")
+        retarget = hint.get("retarget") or []
+        missing = hint.get("missing") or []
+        insert_after = hint.get("insert_after") or 0
+        indent = hint.get("indent") or "        "
+        if not attr or (not retarget and not missing):
+            return None
+        edges: list[tuple[str, int, list[str]]] = []
+        all_lines = _read_lines(sandbox, file)
+        if not all_lines:
+            return None
+        for r in retarget:
+            idx = r.get("line") or 0
+            if not 1 <= idx <= len(all_lines):
+                return None
+            new_line = re.sub(rf"(['\"]){re.escape(r['old'])}\1", f"'{r['new']}'",
+                              all_lines[idx - 1], count=1)
+            if new_line == all_lines[idx - 1]:
+                return None
+            edges.append((file, idx, [new_line]))
+        if missing:
+            if not 1 <= insert_after <= len(all_lines):
+                return None
+            anchor = all_lines[insert_after - 1]
+            added = [anchor]
+            for m in missing:
+                added.append(f"{indent}elif self.{attr} == \"{m['src']}\":")
+                added.append(f"{indent}    self.{attr} = \"{m['dst']}\"")
+            edges.append((file, insert_after, added))
+        return edges
+
+    if rule == "lock_read_modify_write":
+        attr, end = hint.get("attr"), hint.get("end")
+        if not attr or not end:
+            return None
+        all_lines = _read_lines(sandbox, file)
+        if not all_lines:
+            return None
+        class_idx = next((i for i in range(line - 2, -1, -1)
+                          if re.match(r"^class\s+\w+", all_lines[i])), None)
+        if class_idx is None:
+            return None
+        edits: list[tuple[str, int, list[str]]] = []
+        if not any(re.match(r"^import\s+threading\b", l) for l in all_lines):
+            edits.append((file, class_idx + 1, ["import threading", all_lines[class_idx]]))
+        init_idx = next((i for i in range(line - 2, class_idx, -1)
+                         if re.match(r"^(\s*)def\s+__init__\s*\(", all_lines[i])), None)
+        if init_idx is None:
+            return None
+        init_indent = " " * (len(all_lines[init_idx]) - len(all_lines[init_idx].lstrip()) + 4)
+        edits.append((file, init_idx + 1,
+                      [all_lines[init_idx], f"{init_indent}self._lock = threading.Lock()"]))
+        # wrap the method body, leaving a leading docstring outside the lock
+        first, last = line, end - 1
+        if first <= last and all_lines[first].strip()[:3] in ('"""', "'''"):
+            quote = all_lines[first].strip()[:3]
+            while first <= last:
+                closed = (all_lines[first].strip().endswith(quote)
+                          and len(all_lines[first].strip()) >= 6)
+                first += 1
+                if closed:
+                    break
+        block = [all_lines[i] for i in range(first, last + 1)]
+        if not block:
+            return None
+        first_code = next((b for b in block if b.strip()), "")
+        base_indent = re.match(r"^(\s*)", first_code).group(1)
+        edits.append((file, first + 1, [f"{base_indent}with self._lock:", "    " + block[0]]))
+        for off, l in enumerate(block[1:], start=1):
+            edits.append((file, first + off + 1, ["    " + l if l.strip() else l]))
+        return edits
+
     return None
 
 
 def apply_edits(sandbox: Sandbox, edits: list[tuple[str, int, list[str]]]) -> bool:
-    for file, lineno, new_lines in edits:
+    """Apply edits bottom-up so earlier insertions cannot shift later lines."""
+    for file in dict.fromkeys(e[0] for e in edits):
         lines = _read_lines(sandbox, file)
-        if not lines or lineno < 1 or lineno > len(lines):
+        if not lines:
             return False
-        lines[lineno - 1:lineno] = new_lines
+        for _, lineno, new_lines in sorted(
+                [e for e in edits if e[0] == file], key=lambda e: -e[1]):
+            if lineno < 1 or lineno > len(lines):
+                return False
+            lines[lineno - 1:lineno] = new_lines
         _write_lines(sandbox, file, lines)
     return True
 

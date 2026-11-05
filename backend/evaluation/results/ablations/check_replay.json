@@ -1,0 +1,116 @@
+{
+  "candidates": 4,
+  "wrong_candidates": 1,
+  "rows": [
+    {
+      "check": "minimal",
+      "candidates": 4,
+      "accepted_after_removal": 4,
+      "wrong_accepted_after_removal": 1,
+      "wrong_caught_by_check": 0,
+      "wrong_accepted_ids": [
+        "average-nonnull"
+      ],
+      "wrong_caught_ids": []
+    },
+    {
+      "check": "only-expected-files",
+      "candidates": 4,
+      "accepted_after_removal": 4,
+      "wrong_accepted_after_removal": 1,
+      "wrong_caught_by_check": 0,
+      "wrong_accepted_ids": [
+        "average-nonnull"
+      ],
+      "wrong_caught_ids": []
+    },
+    {
+      "check": "syntax",
+      "candidates": 4,
+      "accepted_after_removal": 4,
+      "wrong_accepted_after_removal": 1,
+      "wrong_caught_by_check": 0,
+      "wrong_accepted_ids": [
+        "average-nonnull"
+      ],
+      "wrong_caught_ids": []
+    },
+    {
+      "check": "no-test-changes",
+      "candidates": 4,
+      "accepted_after_removal": 4,
+      "wrong_accepted_after_removal": 1,
+      "wrong_caught_by_check": 0,
+      "wrong_accepted_ids": [
+        "average-nonnull"
+      ],
+      "wrong_caught_ids": []
+    },
+    {
+      "check": "assertions-intact",
+      "candidates": 4,
+      "accepted_after_removal": 4,
+      "wrong_accepted_after_removal": 1,
+      "wrong_caught_by_check": 0,
+      "wrong_accepted_ids": [
+        "average-nonnull"
+      ],
+      "wrong_caught_ids": []
+    },
+    {
+      "check": "error-handling-intact",
+      "candidates": 4,
+      "accepted_after_removal": 4,
+      "wrong_accepted_after_removal": 1,
+      "wrong_caught_by_check": 0,
+      "wrong_accepted_ids": [
+        "average-nonnull"
+      ],
+      "wrong_caught_ids": []
+    },
+    {
+      "check": "no-suspicious-ops",
+      "candidates": 4,
+      "accepted_after_removal": 4,
+      "wrong_accepted_after_removal": 1,
+      "wrong_caught_by_check": 0,
+      "wrong_accepted_ids": [
+        "average-nonnull"
+      ],
+      "wrong_caught_ids": []
+    },
+    {
+      "check": "failure-fixed",
+      "candidates": 4,
+      "accepted_after_removal": 4,
+      "wrong_accepted_after_removal": 1,
+      "wrong_caught_by_check": 0,
+      "wrong_accepted_ids": [
+        "average-nonnull"
+      ],
+      "wrong_caught_ids": []
+    },
+    {
+      "check": "previously-passing-tests",
+      "candidates": 4,
+      "accepted_after_removal": 4,
+      "wrong_accepted_after_removal": 1,
+      "wrong_caught_by_check": 0,
+      "wrong_accepted_ids": [
+        "average-nonnull"
+      ],
+      "wrong_caught_ids": []
+    },
+    {
+      "check": "no-new-failures",
+      "candidates": 4,
+      "accepted_after_removal": 4,
+      "wrong_accepted_after_removal": 1,
+      "wrong_caught_by_check": 0,
+      "wrong_accepted_ids": [
+        "average-nonnull"
+      ],
+      "wrong_caught_ids": []
+    }
+  ]
+}

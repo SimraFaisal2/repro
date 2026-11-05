@@ -1,0 +1,17 @@
+{
+  "id": "sort-in-place",
+  "name": "Ordering helper sorts the caller's list in place",
+  "category": "mutation-aliasing",
+  "difficulty": "easy",
+  "root_cause_file": "src/ordering.py",
+  "root_cause_line": 4,
+  "hidden_bug": "ordered() calls list.sort() on the argument and returns the same list, silently reordering the caller's data.",
+  "expected_behavior": "ordered([3, 1, 2]) returns [1, 2, 3] while the input stays [3, 1, 2].",
+  "ground_truth_summary": "Return sorted(values) instead of sorting in place.",
+  "baseline_failed": [
+    "tests/test_ordering.py::test_does_not_mutate"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

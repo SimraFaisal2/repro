@@ -1,0 +1,18 @@
+{
+  "id": "plugin-registry",
+  "name": "Plugin registered under a name the manifest does not use",
+  "category": "multi-file",
+  "difficulty": "medium",
+  "root_cause_file": "src/registry.py",
+  "root_cause_line": 5,
+  "hidden_bug": "The alpha plugin exports NAME='alpha-v1' but the registry hardcodes the key 'alpha'; the plugin's run() also adds instead of doubles.",
+  "expected_behavior": "The plugin is discoverable by its exported name and doubles its input.",
+  "ground_truth_summary": "Register by NAME and fix the plugin's arithmetic.",
+  "baseline_failed": [
+    "tests/test_registry.py::test_lookup_by_exported_name",
+    "tests/test_registry.py::test_plugin_doubles"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

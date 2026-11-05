@@ -1,0 +1,9 @@
+diff --git a/src/chunks.py b/src/chunks.py
+--- a/src/chunks.py
++++ b/src/chunks.py
+@@ -4,4 +4,4 @@
+ def chunks(values, size):
+     if size <= 0:
+         raise ValueError("size must be positive")
+-    return [values[i:i + size - 1] for i in range(0, len(values), size)]
++    return [values[i:i + size] for i in range(0, len(values), size)]

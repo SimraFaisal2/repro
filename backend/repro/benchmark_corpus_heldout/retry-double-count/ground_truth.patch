@@ -1,0 +1,10 @@
+diff --git a/src/retry.py b/src/retry.py
+--- a/src/retry.py
++++ b/src/retry.py
+@@ -8,6 +8,5 @@
+     def attempt(self, succeed):
+         self.attempts += 1
+         if succeed:
+-            self.attempts += 1
+             return True
+         return False

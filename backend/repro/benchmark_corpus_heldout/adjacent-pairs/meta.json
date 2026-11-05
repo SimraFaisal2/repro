@@ -1,0 +1,17 @@
+{
+  "id": "adjacent-pairs",
+  "name": "Adjacent sums walk past the last element",
+  "category": "off-by-one",
+  "difficulty": "easy",
+  "root_cause_file": "src/pairs.py",
+  "root_cause_line": 4,
+  "hidden_bug": "pair_sums iterates over range(len(values)) and reads values[i + 1], so the final index is out of range.",
+  "expected_behavior": "pair_sums([1, 2, 3]) returns [3, 5]; empty and single inputs return an empty list.",
+  "ground_truth_summary": "Iterate over range(len(values) - 1).",
+  "baseline_failed": [
+    "tests/test_pairs.py::test_pairs"
+  ],
+  "visible_tests": 2,
+  "oracle_tests": 4,
+  "tags": []
+}

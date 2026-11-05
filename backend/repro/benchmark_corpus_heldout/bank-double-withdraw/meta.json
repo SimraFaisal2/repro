@@ -1,0 +1,17 @@
+{
+  "id": "bank-double-withdraw",
+  "name": "Withdrawal subtracts the amount twice",
+  "category": "wrong-state",
+  "difficulty": "easy",
+  "root_cause_file": "src/account.py",
+  "root_cause_line": 9,
+  "hidden_bug": "Account.withdraw() subtracts the amount twice, so a 30 withdrawal from 100 leaves 40 instead of 70.",
+  "expected_behavior": "One withdrawal reduces the balance by exactly the requested amount.",
+  "ground_truth_summary": "Remove the duplicated balance update.",
+  "baseline_failed": [
+    "tests/test_account.py::test_withdraw_once"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

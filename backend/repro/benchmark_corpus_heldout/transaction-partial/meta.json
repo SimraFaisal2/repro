@@ -1,0 +1,17 @@
+{
+  "id": "transaction-partial",
+  "name": "Failed transaction leaves earlier items committed",
+  "category": "exception-handling",
+  "difficulty": "medium",
+  "root_cause_file": "src/store.py",
+  "root_cause_line": 9,
+  "hidden_bug": "Store.add_all() appends items one by one before validating the whole batch, so an invalid item leaves a partial commit behind.",
+  "expected_behavior": "If any item is None, add_all raises and the store is unchanged.",
+  "ground_truth_summary": "Validate the full batch before mutating the store.",
+  "baseline_failed": [
+    "tests/test_store.py::test_failed_batch_is_atomic"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

@@ -1,0 +1,10 @@
+diff --git a/src/inventory.py b/src/inventory.py
+--- a/src/inventory.py
++++ b/src/inventory.py
+@@ -17,5 +17,5 @@
+         if amount > self.reserved:
+             raise ValueError("not enough reserved stock")
+         self.reserved -= amount
+-        self.available -= amount
++        self.available += amount
+         return self.available

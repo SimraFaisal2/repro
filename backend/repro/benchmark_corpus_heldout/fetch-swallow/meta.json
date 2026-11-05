@@ -1,0 +1,17 @@
+{
+  "id": "fetch-swallow",
+  "name": "Fetch helper converts every failure into None",
+  "category": "exception-handling",
+  "difficulty": "easy",
+  "root_cause_file": "src/fetch.py",
+  "root_cause_line": 9,
+  "hidden_bug": "fetch() catches every exception and returns None, so callers cannot distinguish a missing value from a broken client.",
+  "expected_behavior": "Client errors propagate; a successful response is returned unchanged.",
+  "ground_truth_summary": "Remove the broad except and let the client exception propagate.",
+  "baseline_failed": [
+    "tests/test_fetch.py::test_propagates_client_error"
+  ],
+  "visible_tests": 2,
+  "oracle_tests": 4,
+  "tags": []
+}

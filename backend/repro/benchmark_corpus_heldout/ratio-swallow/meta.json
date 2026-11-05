@@ -1,0 +1,17 @@
+{
+  "id": "ratio-swallow",
+  "name": "Ratio helper turns division by zero into zero",
+  "category": "exception-handling",
+  "difficulty": "easy",
+  "root_cause_file": "src/ratio.py",
+  "root_cause_line": 7,
+  "hidden_bug": "ratio() catches ZeroDivisionError and returns 0, hiding an invalid denominator instead of letting the error reach the caller.",
+  "expected_behavior": "A zero denominator raises ZeroDivisionError; normal division works.",
+  "ground_truth_summary": "Remove the exception handler.",
+  "baseline_failed": [
+    "tests/test_ratio.py::test_zero_denominator_raises"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

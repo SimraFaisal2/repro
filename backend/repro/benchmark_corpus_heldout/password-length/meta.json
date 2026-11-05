@@ -1,0 +1,17 @@
+{
+  "id": "password-length",
+  "name": "Password minimum is off by one",
+  "category": "wrong-operator",
+  "difficulty": "easy",
+  "root_cause_file": "src/auth.py",
+  "root_cause_line": 4,
+  "hidden_bug": "valid_password() requires len(password) > 8, rejecting the documented eight-character minimum.",
+  "expected_behavior": "valid_password('12345678') is True; seven characters is False.",
+  "ground_truth_summary": "Use >= 8.",
+  "baseline_failed": [
+    "tests/test_auth.py::test_exact_minimum"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

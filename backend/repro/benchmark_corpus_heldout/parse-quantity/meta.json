@@ -1,0 +1,17 @@
+{
+  "id": "parse-quantity",
+  "name": "Quantity parser rejects values with units",
+  "category": "type-errors",
+  "difficulty": "easy",
+  "root_cause_file": "src/quantity.py",
+  "root_cause_line": 4,
+  "hidden_bug": "quantity() calls int() on the whole string, so '3 items' raises ValueError instead of reading the numeric prefix.",
+  "expected_behavior": "quantity('3 items') returns 3; a bare number still works.",
+  "ground_truth_summary": "Take the first whitespace-separated token before int().",
+  "baseline_failed": [
+    "tests/test_quantity.py::test_with_units"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

@@ -1,0 +1,19 @@
+{
+  "id": "user-serializer",
+  "name": "Serializer uses a field the model does not have",
+  "category": "multi-file",
+  "difficulty": "medium",
+  "root_cause_file": "src/serializers.py",
+  "root_cause_line": 4,
+  "hidden_bug": "User.full_name() returns only the first name, and serialize() reads the nonexistent user.name attribute, so profile serialization crashes.",
+  "expected_behavior": "full_name() returns 'Ada Lovelace' and serialize() exposes it as name.",
+  "ground_truth_summary": "Build the full name in the model and use full_name() in the serializer.",
+  "baseline_failed": [
+    "tests/test_serializers.py::test_full_name",
+    "tests/test_serializers.py::test_serialize_user",
+    "tests/test_serializers.py::test_single_name"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

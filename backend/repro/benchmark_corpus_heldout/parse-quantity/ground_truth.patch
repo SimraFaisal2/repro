@@ -1,0 +1,9 @@
+diff --git a/src/quantity.py b/src/quantity.py
+--- a/src/quantity.py
++++ b/src/quantity.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def quantity(text):
+-    return int(text)
++    return int(str(text).split()[0])

@@ -1,0 +1,18 @@
+{
+  "id": "grade-boundaries",
+  "name": "Grade boundaries use strict comparisons",
+  "category": "wrong-operator",
+  "difficulty": "medium",
+  "root_cause_file": "src/grades.py",
+  "root_cause_line": 5,
+  "hidden_bug": "grade() uses `score > 90` and `score > 80`, so exactly 90 is a B and exactly 80 is a C, contradicting the published cutoffs.",
+  "expected_behavior": "90 is an A, 80 is a B, 70 is a C, and 69 is an F.",
+  "ground_truth_summary": "Make the A and B comparisons inclusive.",
+  "baseline_failed": [
+    "tests/test_grades.py::test_eighty",
+    "tests/test_grades.py::test_ninety"
+  ],
+  "visible_tests": 4,
+  "oracle_tests": 5,
+  "tags": []
+}

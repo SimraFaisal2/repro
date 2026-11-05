@@ -1,0 +1,9 @@
+diff --git a/src/payloads.py b/src/payloads.py
+--- a/src/payloads.py
++++ b/src/payloads.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def items(payload):
+-    return payload["items"]
++    return payload.get("items") or []

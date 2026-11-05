@@ -1,0 +1,10 @@
+diff --git a/src/config.py b/src/config.py
+--- a/src/config.py
++++ b/src/config.py
+@@ -2,4 +2,5 @@
+ 
+ 
+ def timeout(config):
+-    return config.get("timeout", 30)
++    value = config.get("timeout")
++    return 30 if value is None else value

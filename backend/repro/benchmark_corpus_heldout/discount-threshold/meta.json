@@ -1,0 +1,17 @@
+{
+  "id": "discount-threshold",
+  "name": "Discount excludes exactly 100",
+  "category": "wrong-operator",
+  "difficulty": "easy",
+  "root_cause_file": "src/pricing.py",
+  "root_cause_line": 4,
+  "hidden_bug": "discount() uses `total > 100` instead of `total >= 100`, so an order of exactly 100 misses the advertised discount.",
+  "expected_behavior": "discount(100) returns 90.0; discount(99.99) returns 99.99.",
+  "ground_truth_summary": "Use >= in the threshold comparison.",
+  "baseline_failed": [
+    "tests/test_pricing.py::test_exact_threshold"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

@@ -1,0 +1,18 @@
+{
+  "id": "last-n",
+  "name": "last_n returns n+1 items",
+  "category": "off-by-one",
+  "difficulty": "easy",
+  "root_cause_file": "src/tail.py",
+  "root_cause_line": 4,
+  "hidden_bug": "last_n slices with -n - 1, returning one more element than requested; it also mishandles n = 0.",
+  "expected_behavior": "last_n([1, 2, 3, 4, 5], 2) returns [4, 5] and n=0 returns [].",
+  "ground_truth_summary": "Return [] for n <= 0, otherwise values[-n:].",
+  "baseline_failed": [
+    "tests/test_tail.py::test_last_two",
+    "tests/test_tail.py::test_zero"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

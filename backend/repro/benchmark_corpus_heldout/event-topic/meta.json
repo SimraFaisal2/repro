@@ -1,0 +1,17 @@
+{
+  "id": "event-topic",
+  "name": "Handler subscribes to a misspelled topic",
+  "category": "multi-file",
+  "difficulty": "medium",
+  "root_cause_file": "src/handlers.py",
+  "root_cause_line": 6,
+  "hidden_bug": "The event bus publishes to TOPIC='user.created' but the handler registers for 'user-created', so no subscriber is ever called.",
+  "expected_behavior": "Publishing TOPIC invokes the registered handler exactly once.",
+  "ground_truth_summary": "Subscribe using the shared TOPIC constant.",
+  "baseline_failed": [
+    "tests/test_handlers.py::test_handler_receives_event"
+  ],
+  "visible_tests": 2,
+  "oracle_tests": 4,
+  "tags": []
+}

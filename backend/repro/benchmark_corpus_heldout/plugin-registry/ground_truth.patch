@@ -1,0 +1,21 @@
+diff --git a/src/plugins/alpha.py b/src/plugins/alpha.py
+--- a/src/plugins/alpha.py
++++ b/src/plugins/alpha.py
+@@ -4,4 +4,4 @@
+ 
+ 
+ def run(value):
+-    return value + 2
++    return value * 2
+diff --git a/src/registry.py b/src/registry.py
+--- a/src/registry.py
++++ b/src/registry.py
+@@ -2,7 +2,7 @@
+ 
+ from src.plugins.alpha import NAME, run
+ 
+-PLUGINS = {"alpha": run}
++PLUGINS = {NAME: run}
+ 
+ 
+ def get(name):

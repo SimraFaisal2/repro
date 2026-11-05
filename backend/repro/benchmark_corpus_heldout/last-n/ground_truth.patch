@@ -1,0 +1,11 @@
+diff --git a/src/tail.py b/src/tail.py
+--- a/src/tail.py
++++ b/src/tail.py
+@@ -2,4 +2,6 @@
+ 
+ 
+ def last_n(values, n):
+-    return values[-n - 1:]
++    if n <= 0:
++        return []
++    return values[-n:]

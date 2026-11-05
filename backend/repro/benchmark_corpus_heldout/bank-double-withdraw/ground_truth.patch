@@ -1,0 +1,9 @@
+diff --git a/src/account.py b/src/account.py
+--- a/src/account.py
++++ b/src/account.py
+@@ -9,5 +9,4 @@
+         if amount > self.balance:
+             raise ValueError("insufficient funds")
+         self.balance -= amount
+-        self.balance -= amount
+         return self.balance

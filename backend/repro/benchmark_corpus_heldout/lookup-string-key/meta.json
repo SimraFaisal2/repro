@@ -1,0 +1,17 @@
+{
+  "id": "lookup-string-key",
+  "name": "Lookup does not normalize string keys",
+  "category": "type-errors",
+  "difficulty": "medium",
+  "root_cause_file": "src/lookup.py",
+  "root_cause_line": 4,
+  "hidden_bug": "lookup() indexes a dict with integer keys using the string form, raising KeyError for feed ids that arrive as strings.",
+  "expected_behavior": "lookup({1: 'a'}, '1') returns 'a'; an unknown key still raises.",
+  "ground_truth_summary": "Try the key as given, then as an int, and re-raise KeyError.",
+  "baseline_failed": [
+    "tests/test_lookup.py::test_string_key_for_int_dict"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

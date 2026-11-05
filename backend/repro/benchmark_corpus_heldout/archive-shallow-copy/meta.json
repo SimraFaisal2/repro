@@ -1,0 +1,17 @@
+{
+  "id": "archive-shallow-copy",
+  "name": "Archive shallow-copies rows and mutates originals",
+  "category": "mutation-aliasing",
+  "difficulty": "medium",
+  "root_cause_file": "src/archive.py",
+  "root_cause_line": 5,
+  "hidden_bug": "archive() copies the outer list but not each row dict, so setting 'archived' on the copies also changes the caller's rows.",
+  "expected_behavior": "archive(rows) returns archived copies while rows stay unchanged.",
+  "ground_truth_summary": "Copy each row dict before mutating it.",
+  "baseline_failed": [
+    "tests/test_archive.py::test_does_not_mutate_original_rows"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

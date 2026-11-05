@@ -1,0 +1,18 @@
+{
+  "id": "profile-city",
+  "name": "Missing address crashes profile lookup",
+  "category": "none-handling",
+  "difficulty": "easy",
+  "root_cause_file": "src/profile.py",
+  "root_cause_line": 4,
+  "hidden_bug": "city() indexes user['address']['city'] without allowing a missing or null address.",
+  "expected_behavior": "A user without an address, or with a null city, returns 'unknown'.",
+  "ground_truth_summary": "Guard the address lookup and default to 'unknown'.",
+  "baseline_failed": [
+    "tests/test_profile.py::test_missing_address",
+    "tests/test_profile.py::test_null_address"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

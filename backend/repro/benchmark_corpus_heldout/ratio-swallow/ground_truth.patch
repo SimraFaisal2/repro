@@ -1,0 +1,12 @@
+diff --git a/src/ratio.py b/src/ratio.py
+--- a/src/ratio.py
++++ b/src/ratio.py
+@@ -2,7 +2,4 @@
+ 
+ 
+ def ratio(numerator, denominator):
+-    try:
+-        return numerator / denominator
+-    except ZeroDivisionError:
+-        return 0
++    return numerator / denominator

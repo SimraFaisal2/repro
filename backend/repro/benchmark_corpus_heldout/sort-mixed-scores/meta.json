@@ -1,0 +1,17 @@
+{
+  "id": "sort-mixed-scores",
+  "name": "Score sorter cannot compare ints and strings",
+  "category": "type-errors",
+  "difficulty": "medium",
+  "root_cause_file": "src/scores.py",
+  "root_cause_line": 4,
+  "hidden_bug": "sorted_scores() calls sorted() on a mixed list of ints and numeric strings, which raises TypeError in Python 3.",
+  "expected_behavior": "Mixed scores sort numerically while preserving their original values.",
+  "ground_truth_summary": "Sort with a float-converting key.",
+  "baseline_failed": [
+    "tests/test_scores.py::test_mixed_types"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

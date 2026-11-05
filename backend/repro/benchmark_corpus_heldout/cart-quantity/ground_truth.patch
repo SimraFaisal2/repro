@@ -1,0 +1,9 @@
+diff --git a/src/cart.py b/src/cart.py
+--- a/src/cart.py
++++ b/src/cart.py
+@@ -6,4 +6,4 @@
+         self.items = {}
+ 
+     def add(self, sku, qty):
+-        self.items[sku] = qty
++        self.items[sku] = self.items.get(sku, 0) + qty

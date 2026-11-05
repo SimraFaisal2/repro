@@ -1,0 +1,10 @@
+diff --git a/src/ordering.py b/src/ordering.py
+--- a/src/ordering.py
++++ b/src/ordering.py
+@@ -2,5 +2,4 @@
+ 
+ 
+ def ordered(values):
+-    values.sort()
+-    return values
++    return sorted(values)

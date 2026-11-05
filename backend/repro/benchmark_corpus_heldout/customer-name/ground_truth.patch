@@ -1,0 +1,10 @@
+diff --git a/src/orders.py b/src/orders.py
+--- a/src/orders.py
++++ b/src/orders.py
+@@ -12,4 +12,6 @@
+ 
+ 
+ def customer_name(order):
++    if order.customer is None or not order.customer.name:
++        return "guest"
+     return order.customer.name

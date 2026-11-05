@@ -1,0 +1,12 @@
+diff --git a/src/archive.py b/src/archive.py
+--- a/src/archive.py
++++ b/src/archive.py
+@@ -2,7 +2,7 @@
+ 
+ 
+ def archive(rows):
+-    copied = list(rows)
++    copied = [dict(row) for row in rows]
+     for row in copied:
+         row["archived"] = True
+     return copied

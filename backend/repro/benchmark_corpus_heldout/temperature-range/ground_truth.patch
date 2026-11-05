@@ -1,0 +1,9 @@
+diff --git a/src/climate.py b/src/climate.py
+--- a/src/climate.py
++++ b/src/climate.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def in_range(t):
+-    return -40 < t > 125
++    return -40 <= t <= 125

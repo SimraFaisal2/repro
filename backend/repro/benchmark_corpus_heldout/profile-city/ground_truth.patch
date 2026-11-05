@@ -1,0 +1,12 @@
+diff --git a/src/profile.py b/src/profile.py
+--- a/src/profile.py
++++ b/src/profile.py
+@@ -2,4 +2,7 @@
+ 
+ 
+ def city(user):
+-    return user["address"]["city"]
++    address = user.get("address")
++    if not address:
++        return "unknown"
++    return address.get("city") or "unknown"

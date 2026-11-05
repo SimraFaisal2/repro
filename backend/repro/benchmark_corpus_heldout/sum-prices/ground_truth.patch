@@ -1,0 +1,9 @@
+diff --git a/src/billing.py b/src/billing.py
+--- a/src/billing.py
++++ b/src/billing.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def total(prices):
+-    return sum(prices)
++    return sum(float(price) for price in prices)

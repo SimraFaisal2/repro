@@ -1,0 +1,17 @@
+{
+  "id": "inventory-release",
+  "name": "Releasing a reservation consumes stock",
+  "category": "wrong-state",
+  "difficulty": "medium",
+  "root_cause_file": "src/inventory.py",
+  "root_cause_line": 18,
+  "hidden_bug": "release() subtracts from available instead of adding back, so returning reserved stock decreases the sellable quantity.",
+  "expected_behavior": "Releasing n units increases available by n and decreases reserved by n.",
+  "ground_truth_summary": "Add released units back to available.",
+  "baseline_failed": [
+    "tests/test_inventory.py::test_release"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

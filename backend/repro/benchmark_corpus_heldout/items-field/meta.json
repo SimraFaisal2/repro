@@ -1,0 +1,18 @@
+{
+  "id": "items-field",
+  "name": "Null items payload is not normalized",
+  "category": "none-handling",
+  "difficulty": "easy",
+  "root_cause_file": "src/payloads.py",
+  "root_cause_line": 4,
+  "hidden_bug": "items() indexes payload['items'], so a missing key raises KeyError and a null value returns None instead of an empty list.",
+  "expected_behavior": "A missing or null items field returns [].",
+  "ground_truth_summary": "Use .get('items') or [].",
+  "baseline_failed": [
+    "tests/test_payloads.py::test_missing",
+    "tests/test_payloads.py::test_null"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

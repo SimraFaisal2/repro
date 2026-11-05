@@ -1,0 +1,17 @@
+{
+  "id": "parse-users-skip",
+  "name": "User parser silently skips malformed rows",
+  "category": "exception-handling",
+  "difficulty": "medium",
+  "root_cause_file": "src/users.py",
+  "root_cause_line": 8,
+  "hidden_bug": "parse_users() catches KeyError and continues, so a missing name silently drops a user instead of failing the import.",
+  "expected_behavior": "A row without name raises ValueError; valid rows are returned.",
+  "ground_truth_summary": "Validate the name field and raise ValueError instead of skipping.",
+  "baseline_failed": [
+    "tests/test_users.py::test_missing_name_raises"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

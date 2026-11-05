@@ -1,0 +1,17 @@
+{
+  "id": "zero-grid-aliasing",
+  "name": "Grid rows alias one shared list",
+  "category": "mutation-aliasing",
+  "difficulty": "medium",
+  "root_cause_file": "src/grid.py",
+  "root_cause_line": 4,
+  "hidden_bug": "zero_grid() builds [[0] * cols] * rows, which repeats the same inner list object, so writing one cell changes every row.",
+  "expected_behavior": "Each grid row is an independent list.",
+  "ground_truth_summary": "Build each row with a separate comprehension.",
+  "baseline_failed": [
+    "tests/test_grid.py::test_rows_are_independent"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

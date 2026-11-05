@@ -1,0 +1,18 @@
+{
+  "id": "temperature-range",
+  "name": "Temperature check uses an impossible chained comparison",
+  "category": "wrong-operator",
+  "difficulty": "medium",
+  "root_cause_file": "src/climate.py",
+  "root_cause_line": 4,
+  "hidden_bug": "in_range() evaluates `-40 < t > 125`, which can never be true, instead of checking that t lies between the inclusive bounds.",
+  "expected_behavior": "in_range(20) is True; both -40 and 125 are inclusive.",
+  "ground_truth_summary": "Use -40 <= t <= 125.",
+  "baseline_failed": [
+    "tests/test_climate.py::test_normal",
+    "tests/test_climate.py::test_too_hot"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

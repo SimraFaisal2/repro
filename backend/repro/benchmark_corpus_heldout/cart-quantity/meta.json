@@ -1,0 +1,17 @@
+{
+  "id": "cart-quantity",
+  "name": "Adding an existing SKU overwrites its quantity",
+  "category": "wrong-state",
+  "difficulty": "easy",
+  "root_cause_file": "src/cart.py",
+  "root_cause_line": 7,
+  "hidden_bug": "Cart.add() assigns the new quantity instead of adding it to the existing quantity for the same SKU.",
+  "expected_behavior": "Adding 3 then 2 of a SKU leaves a quantity of 5.",
+  "ground_truth_summary": "Accumulate with self.items.get(sku, 0) + qty.",
+  "baseline_failed": [
+    "tests/test_cart.py::test_add_existing_sku"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

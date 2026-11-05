@@ -1,0 +1,12 @@
+diff --git a/src/parse.py b/src/parse.py
+--- a/src/parse.py
++++ b/src/parse.py
+@@ -2,7 +2,4 @@
+ 
+ 
+ def parse(text):
+-    try:
+-        return int(text)
+-    except ValueError:
+-        return 0
++    return int(text)

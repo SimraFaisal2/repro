@@ -1,0 +1,14 @@
+diff --git a/src/store.py b/src/store.py
+--- a/src/store.py
++++ b/src/store.py
+@@ -6,7 +6,6 @@
+         self.items = []
+ 
+     def add_all(self, items):
+-        for item in items:
+-            if item is None:
+-                raise ValueError("null item")
+-            self.items.append(item)
++        if any(item is None for item in items):
++            raise ValueError("null item")
++        self.items.extend(items)

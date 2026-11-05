@@ -1,0 +1,17 @@
+{
+  "id": "label-user-id",
+  "name": "Label concatenates an integer user id",
+  "category": "type-errors",
+  "difficulty": "easy",
+  "root_cause_file": "src/labels.py",
+  "root_cause_line": 4,
+  "hidden_bug": "label() concatenates str and int, raising TypeError for numeric ids.",
+  "expected_behavior": "label(42) returns 'user-42'; string ids keep working.",
+  "ground_truth_summary": "Format the id instead of concatenating it directly.",
+  "baseline_failed": [
+    "tests/test_labels.py::test_numeric_id"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

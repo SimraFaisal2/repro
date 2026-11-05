@@ -1,0 +1,17 @@
+{
+  "id": "append-tag",
+  "name": "Adding a tag mutates the caller's list",
+  "category": "mutation-aliasing",
+  "difficulty": "easy",
+  "root_cause_file": "src/tags.py",
+  "root_cause_line": 4,
+  "hidden_bug": "with_tag() appends to the caller's list and returns the same object, so constructing a tagged copy changes the original.",
+  "expected_behavior": "with_tag(['a'], 'b') returns ['a', 'b'] without modifying ['a'].",
+  "ground_truth_summary": "Build and return a new list.",
+  "baseline_failed": [
+    "tests/test_tags.py::test_does_not_mutate_input"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

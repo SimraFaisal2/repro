@@ -1,0 +1,17 @@
+{
+  "id": "parse-int-swallow",
+  "name": "Integer parser hides invalid input as zero",
+  "category": "exception-handling",
+  "difficulty": "easy",
+  "root_cause_file": "src/parse.py",
+  "root_cause_line": 7,
+  "hidden_bug": "parse() catches ValueError and returns 0, so malformed input silently becomes a valid zero instead of raising.",
+  "expected_behavior": "parse('x') raises ValueError; parse('3') returns 3.",
+  "ground_truth_summary": "Remove the except and let int() raise.",
+  "baseline_failed": [
+    "tests/test_parse.py::test_invalid_raises"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

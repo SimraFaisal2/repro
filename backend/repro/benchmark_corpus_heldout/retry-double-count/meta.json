@@ -1,0 +1,18 @@
+{
+  "id": "retry-double-count",
+  "name": "Successful retry increments the attempt counter twice",
+  "category": "wrong-state",
+  "difficulty": "medium",
+  "root_cause_file": "src/retry.py",
+  "root_cause_line": 8,
+  "hidden_bug": "Retrier.attempt() increments attempts before the success branch and again inside it, so a success is counted as two attempts.",
+  "expected_behavior": "Each call counts as exactly one attempt, regardless of outcome.",
+  "ground_truth_summary": "Remove the second increment.",
+  "baseline_failed": [
+    "tests/test_retry.py::test_success_counts_once",
+    "tests/test_retry.py::test_two_failures_then_success"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

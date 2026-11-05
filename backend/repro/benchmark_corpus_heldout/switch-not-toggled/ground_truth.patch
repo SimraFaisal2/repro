@@ -1,0 +1,10 @@
+diff --git a/src/switch.py b/src/switch.py
+--- a/src/switch.py
++++ b/src/switch.py
+@@ -6,5 +6,5 @@
+         self.on = False
+ 
+     def press(self):
+-        self.on = True
++        self.on = not self.on
+         return self.on

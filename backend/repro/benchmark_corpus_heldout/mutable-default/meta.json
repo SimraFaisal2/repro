@@ -1,0 +1,17 @@
+{
+  "id": "mutable-default",
+  "name": "Mutable default argument leaks items across calls",
+  "category": "mutation-aliasing",
+  "difficulty": "medium",
+  "root_cause_file": "src/buckets.py",
+  "root_cause_line": 4,
+  "hidden_bug": "add_item() uses a mutable default list, so items accumulate between calls that do not pass an explicit bucket.",
+  "expected_behavior": "Two separate calls with no bucket each return a one-item list.",
+  "ground_truth_summary": "Use None as the sentinel and create a fresh list per call.",
+  "baseline_failed": [
+    "tests/test_buckets.py::test_second_call_is_fresh"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

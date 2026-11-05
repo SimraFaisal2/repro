@@ -1,0 +1,10 @@
+diff --git a/src/tags.py b/src/tags.py
+--- a/src/tags.py
++++ b/src/tags.py
+@@ -2,5 +2,4 @@
+ 
+ 
+ def with_tag(tags, tag):
+-    tags.append(tag)
+-    return tags
++    return [*tags, tag]

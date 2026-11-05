@@ -1,0 +1,18 @@
+{
+  "id": "page-window",
+  "name": "Page window returns one extra item",
+  "category": "off-by-one",
+  "difficulty": "easy",
+  "root_cause_file": "src/paging.py",
+  "root_cause_line": 6,
+  "hidden_bug": "page() ends the slice at start + size + 1, so every page contains size + 1 items and overlaps the next page.",
+  "expected_behavior": "page(items, 2, 10) returns exactly items[10:20].",
+  "ground_truth_summary": "Use start + size as the slice end.",
+  "baseline_failed": [
+    "tests/test_paging.py::test_first_page",
+    "tests/test_paging.py::test_second_page"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

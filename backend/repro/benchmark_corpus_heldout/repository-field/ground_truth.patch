@@ -1,0 +1,9 @@
+diff --git a/src/repository.py b/src/repository.py
+--- a/src/repository.py
++++ b/src/repository.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def email_of(row):
+-    return row["email"]
++    return row["email_address"]

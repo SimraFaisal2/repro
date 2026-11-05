@@ -1,0 +1,17 @@
+{
+  "id": "timeout-default",
+  "name": "Explicit null timeout bypasses the default",
+  "category": "none-handling",
+  "difficulty": "medium",
+  "root_cause_file": "src/config.py",
+  "root_cause_line": 4,
+  "hidden_bug": "timeout() uses dict.get(key, default), which returns None when the key exists with a null value; callers then get None instead of 30.",
+  "expected_behavior": "A missing or null timeout returns 30; an explicit 0 is preserved.",
+  "ground_truth_summary": "Check for None explicitly rather than relying on the get default.",
+  "baseline_failed": [
+    "tests/test_config.py::test_null"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

@@ -1,0 +1,17 @@
+{
+  "id": "switch-not-toggled",
+  "name": "Switch press sets on instead of toggling",
+  "category": "wrong-state",
+  "difficulty": "easy",
+  "root_cause_file": "src/switch.py",
+  "root_cause_line": 7,
+  "hidden_bug": "Switch.press() assigns True instead of negating the current state, so a second press leaves the switch on.",
+  "expected_behavior": "Each press flips the state; two presses return to off.",
+  "ground_truth_summary": "Assign `not self.on`.",
+  "baseline_failed": [
+    "tests/test_switch.py::test_second_press_turns_off"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

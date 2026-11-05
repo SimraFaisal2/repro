@@ -1,0 +1,12 @@
+diff --git a/src/stats.py b/src/stats.py
+--- a/src/stats.py
++++ b/src/stats.py
+@@ -2,4 +2,7 @@
+ 
+ 
+ def average(values):
+-    return sum(values) / len(values)
++    present = [value for value in values if value is not None]
++    if not present:
++        return 0.0
++    return sum(present) / len(present)

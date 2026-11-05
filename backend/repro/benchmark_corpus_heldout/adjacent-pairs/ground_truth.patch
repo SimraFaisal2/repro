@@ -1,0 +1,9 @@
+diff --git a/src/pairs.py b/src/pairs.py
+--- a/src/pairs.py
++++ b/src/pairs.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def pair_sums(values):
+-    return [values[i] + values[i + 1] for i in range(len(values))]
++    return [values[i] + values[i + 1] for i in range(len(values) - 1)]

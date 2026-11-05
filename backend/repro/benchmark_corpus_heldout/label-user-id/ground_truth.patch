@@ -1,0 +1,9 @@
+diff --git a/src/labels.py b/src/labels.py
+--- a/src/labels.py
++++ b/src/labels.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def label(user_id):
+-    return "user-" + user_id
++    return f"user-{user_id}"

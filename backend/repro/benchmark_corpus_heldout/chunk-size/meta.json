@@ -1,0 +1,18 @@
+{
+  "id": "chunk-size",
+  "name": "Chunker uses size-1 as the chunk width",
+  "category": "off-by-one",
+  "difficulty": "medium",
+  "root_cause_file": "src/chunks.py",
+  "root_cause_line": 7,
+  "hidden_bug": "chunks() slices values[i:i + size - 1] while stepping by size, so it drops the final item of every chunk and produces empty chunks for size 1.",
+  "expected_behavior": "chunks([1..5], 2) returns [[1, 2], [3, 4], [5]].",
+  "ground_truth_summary": "Slice at i + size and reject size <= 0.",
+  "baseline_failed": [
+    "tests/test_chunks.py::test_pairs",
+    "tests/test_chunks.py::test_size_one"
+  ],
+  "visible_tests": 4,
+  "oracle_tests": 4,
+  "tags": []
+}

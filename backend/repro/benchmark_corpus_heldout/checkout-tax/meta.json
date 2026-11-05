@@ -1,0 +1,19 @@
+{
+  "id": "checkout-tax",
+  "name": "Checkout applies the tax rate as a flat surcharge",
+  "category": "multi-file",
+  "difficulty": "medium",
+  "root_cause_file": "src/checkout.py",
+  "root_cause_line": 6,
+  "hidden_bug": "The configured tax rate is 20% instead of 10%, and checkout adds the rate as a flat amount rather than multiplying the subtotal.",
+  "expected_behavior": "A 100 subtotal with 10% tax totals 110.0.",
+  "ground_truth_summary": "Set the rate to 0.1 and compute subtotal * (1 + rate).",
+  "baseline_failed": [
+    "tests/test_checkout.py::test_rounding",
+    "tests/test_checkout.py::test_standard_total",
+    "tests/test_checkout.py::test_zero_subtotal"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

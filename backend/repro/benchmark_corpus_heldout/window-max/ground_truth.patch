@@ -1,0 +1,9 @@
+diff --git a/src/windows.py b/src/windows.py
+--- a/src/windows.py
++++ b/src/windows.py
+@@ -4,4 +4,4 @@
+ def max_windows(values, width):
+     if width <= 0:
+         raise ValueError("width must be positive")
+-    return [max(values[i:i + width]) for i in range(len(values) - width)]
++    return [max(values[i:i + width]) for i in range(len(values) - width + 1)]

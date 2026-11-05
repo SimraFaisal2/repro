@@ -1,0 +1,17 @@
+{
+  "id": "repository-field",
+  "name": "Repository reads a renamed model field",
+  "category": "multi-file",
+  "difficulty": "medium",
+  "root_cause_file": "src/repository.py",
+  "root_cause_line": 5,
+  "hidden_bug": "The User model stores the address as email_address, but the repository's email_of() still reads the old 'email' key and raises KeyError.",
+  "expected_behavior": "email_of() reads email_address from a serialized user.",
+  "ground_truth_summary": "Read the renamed field in the repository.",
+  "baseline_failed": [
+    "tests/test_repository.py::test_reads_renamed_field"
+  ],
+  "visible_tests": 2,
+  "oracle_tests": 4,
+  "tags": []
+}

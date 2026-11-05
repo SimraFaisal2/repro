@@ -1,0 +1,9 @@
+diff --git a/src/grid.py b/src/grid.py
+--- a/src/grid.py
++++ b/src/grid.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def zero_grid(rows, cols):
+-    return [[0] * cols] * rows
++    return [[0] * cols for _ in range(rows)]

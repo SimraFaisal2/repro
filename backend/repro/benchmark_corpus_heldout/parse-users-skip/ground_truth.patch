@@ -1,0 +1,15 @@
+diff --git a/src/users.py b/src/users.py
+--- a/src/users.py
++++ b/src/users.py
+@@ -4,8 +4,7 @@
+ def parse_users(rows):
+     parsed = []
+     for row in rows:
+-        try:
+-            parsed.append({"name": row["name"]})
+-        except KeyError:
+-            continue
++        if "name" not in row:
++            raise ValueError("missing name")
++        parsed.append({"name": row["name"]})
+     return parsed

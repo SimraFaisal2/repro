@@ -1,0 +1,18 @@
+{
+  "id": "sum-prices",
+  "name": "Price total assumes numeric strings",
+  "category": "type-errors",
+  "difficulty": "medium",
+  "root_cause_file": "src/billing.py",
+  "root_cause_line": 4,
+  "hidden_bug": "total() sums raw values, so decimal strings from the billing feed raise TypeError and integer prices are not mixed correctly.",
+  "expected_behavior": "total(['1.5', '2.5']) returns 4.0; mixed ints and strings work.",
+  "ground_truth_summary": "Convert every price to float before summing.",
+  "baseline_failed": [
+    "tests/test_billing.py::test_decimal_strings",
+    "tests/test_billing.py::test_ints_and_strings"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

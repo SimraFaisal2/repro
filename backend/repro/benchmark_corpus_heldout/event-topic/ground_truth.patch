@@ -1,0 +1,12 @@
+diff --git a/src/handlers.py b/src/handlers.py
+--- a/src/handlers.py
++++ b/src/handlers.py
+@@ -1,5 +1,7 @@
+ """Event handlers."""
++
++from src.events import TOPIC
+ 
+ 
+ def register(bus):
+-    bus.subscribe("user-created", lambda payload: payload.append("handled"))
++    bus.subscribe(TOPIC, lambda payload: payload.append("handled"))

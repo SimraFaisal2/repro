@@ -1,0 +1,18 @@
+{
+  "id": "customer-name",
+  "name": "Guest orders crash on the customer name",
+  "category": "none-handling",
+  "difficulty": "easy",
+  "root_cause_file": "src/orders.py",
+  "root_cause_line": 12,
+  "hidden_bug": "customer_name() dereferences order.customer.name without handling a null customer.",
+  "expected_behavior": "An order with no customer returns 'guest'; a customer with no name also returns 'guest'.",
+  "ground_truth_summary": "Guard the customer and name lookups.",
+  "baseline_failed": [
+    "tests/test_orders.py::test_guest_order",
+    "tests/test_orders.py::test_unnamed_customer"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

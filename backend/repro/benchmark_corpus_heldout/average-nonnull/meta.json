@@ -1,0 +1,18 @@
+{
+  "id": "average-nonnull",
+  "name": "Average divides by the wrong count when values are null",
+  "category": "none-handling",
+  "difficulty": "medium",
+  "root_cause_file": "src/stats.py",
+  "root_cause_line": 4,
+  "hidden_bug": "average() sums with None values in the list and divides by the original length instead of ignoring missing readings; an empty list divides by zero.",
+  "expected_behavior": "average([1, None, 3]) is 2.0 and average([]) is 0.0.",
+  "ground_truth_summary": "Filter None, return 0.0 when nothing remains.",
+  "baseline_failed": [
+    "tests/test_stats.py::test_empty",
+    "tests/test_stats.py::test_ignores_null"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

@@ -1,0 +1,14 @@
+diff --git a/src/lookup.py b/src/lookup.py
+--- a/src/lookup.py
++++ b/src/lookup.py
+@@ -2,4 +2,9 @@
+ 
+ 
+ def lookup(data, key):
+-    return data[key]
++    if key in data:
++        return data[key]
++    try:
++        return data[int(key)]
++    except (TypeError, ValueError):
++        raise KeyError(key)

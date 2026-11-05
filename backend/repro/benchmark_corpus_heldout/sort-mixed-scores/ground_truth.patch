@@ -1,0 +1,9 @@
+diff --git a/src/scores.py b/src/scores.py
+--- a/src/scores.py
++++ b/src/scores.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def sorted_scores(scores):
+-    return sorted(scores)
++    return sorted(scores, key=lambda value: float(value))

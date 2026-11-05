@@ -1,0 +1,9 @@
+diff --git a/src/auth.py b/src/auth.py
+--- a/src/auth.py
++++ b/src/auth.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def valid_password(password):
+-    return len(password) > 8
++    return len(password) >= 8

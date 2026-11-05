@@ -1,0 +1,18 @@
+diff --git a/src/models.py b/src/models.py
+--- a/src/models.py
++++ b/src/models.py
+@@ -7,4 +7,4 @@
+         self.last = last
+ 
+     def full_name(self):
+-        return self.first
++        return f"{self.first} {self.last}"
+diff --git a/src/serializers.py b/src/serializers.py
+--- a/src/serializers.py
++++ b/src/serializers.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def serialize(user):
+-    return {"name": user.name}
++    return {"name": user.full_name()}

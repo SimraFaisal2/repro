@@ -1,0 +1,18 @@
+{
+  "id": "retry-limit",
+  "name": "Retry predicate compares in the wrong direction",
+  "category": "wrong-operator",
+  "difficulty": "easy",
+  "root_cause_file": "src/retries.py",
+  "root_cause_line": 4,
+  "hidden_bug": "can_retry() returns attempts > limit instead of attempts < limit, so it allows retries after the limit and blocks the first attempt.",
+  "expected_behavior": "can_retry(0, 3) is True and can_retry(3, 3) is False.",
+  "ground_truth_summary": "Compare attempts < limit.",
+  "baseline_failed": [
+    "tests/test_retries.py::test_first_attempt",
+    "tests/test_retries.py::test_over_limit"
+  ],
+  "visible_tests": 3,
+  "oracle_tests": 4,
+  "tags": []
+}

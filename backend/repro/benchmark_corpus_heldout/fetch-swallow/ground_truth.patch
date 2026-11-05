@@ -1,0 +1,12 @@
+diff --git a/src/fetch.py b/src/fetch.py
+--- a/src/fetch.py
++++ b/src/fetch.py
+@@ -6,7 +6,4 @@
+ 
+ 
+ def fetch(client):
+-    try:
+-        return client.get()
+-    except Exception:
+-        return None
++    return client.get()

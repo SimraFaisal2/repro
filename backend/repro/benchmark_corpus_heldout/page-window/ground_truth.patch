@@ -1,0 +1,9 @@
+diff --git a/src/paging.py b/src/paging.py
+--- a/src/paging.py
++++ b/src/paging.py
+@@ -3,4 +3,4 @@
+ 
+ def page(items, number, size):
+     start = (number - 1) * size
+-    return items[start:start + size + 1]
++    return items[start:start + size]

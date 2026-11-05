@@ -1,0 +1,9 @@
+diff --git a/src/retries.py b/src/retries.py
+--- a/src/retries.py
++++ b/src/retries.py
+@@ -2,4 +2,4 @@
+ 
+ 
+ def can_retry(attempts, limit):
+-    return attempts > limit
++    return attempts < limit

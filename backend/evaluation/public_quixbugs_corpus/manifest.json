@@ -1,0 +1,18 @@
+{
+  "corpus_version": "quixbugs-2026-11-v1",
+  "source": "https://github.com/jkoppel/QuixBugs",
+  "source_commit": "4257f44b0ff1181dedaedee6a447e133219fcebf",
+  "scope": "function-level public benchmark; not repository-level",
+  "count": 8,
+  "algorithms": [
+    "find_in_sorted",
+    "gcd",
+    "get_factors",
+    "is_valid_parenthesization",
+    "kth",
+    "max_sublist_sum",
+    "powerset",
+    "to_base"
+  ],
+  "excluded": []
+}

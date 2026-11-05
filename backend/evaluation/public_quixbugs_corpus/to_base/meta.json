@@ -1,0 +1,9 @@
+{
+  "id": "to_base",
+  "name": "QuixBugs: to_base",
+  "category": "quixbugs",
+  "source": "https://github.com/jkoppel/QuixBugs",
+  "source_commit": "4257f44b0ff1181dedaedee6a447e133219fcebf",
+  "cases": 10,
+  "scope": "function-level public benchmark"
+}

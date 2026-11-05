@@ -75,9 +75,11 @@ run:
 | mechanism only | 2 |
 | wrong | 32 |
 
-Diagnosis accuracy under this strict rubric is **3/40 (7.5%)**. The six
-non-wrong labels are not all fixes: `average-nonnull`, `profile-city`, and
-`repository-field` found the right file but the wrong mechanism.
+Diagnosis accuracy under this strict rubric is **3/40 (7.5%)**. The five
+non-correct labels are not all worthless: `average-nonnull`, `profile-city`,
+and `repository-field` found the right file but the wrong mechanism, while
+`lookup-string-key` and `plugin-registry` named a key mismatch but gave no
+location.
 
 ### The false accept
 

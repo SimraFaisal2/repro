@@ -1,6 +1,8 @@
-# REPRO — how to demo it, and which numbers you can quote
+# REPRO — 5-minute demonstration for Prof. Keim & Bastian Jäckl
 
-For the initial meeting with Prof. Keim and Bastian Jäckl.
+This is the interview runbook: a timed script mapped to the four requested parts, the
+numbers you may quote, and short answers to the technical questions. Keep it open on a
+second screen or phone during the call.
 
 ---
 
@@ -8,205 +10,265 @@ For the initial meeting with Prof. Keim and Bastian Jäckl.
 
 > REPRO is an autonomous debugging agent: it reproduces a failing test, records a real
 > runtime trace, diagnoses the root cause, generates a minimal patch, and then **proves**
-> the fix in an isolated sandbox before a human is allowed to apply it.
+> the fix — target test and full suite — inside an isolated sandbox before a human is
+> allowed to apply it.
 
-The claim to stress: **nothing is fabricated** — every value in the UI comes from actual
-execution (pytest output, the recorded trace, the applied diff).
-
----
-
-## How to show it in the call — pick ONE route
-
-You do not need the cloud, a server, an API key or a deploy. Three ways, easiest first.
-
-### Route B — terminal only (most reliable, use this if anything else fails)
-
-No browser, no build step. Opens in ~15 seconds and prints the whole investigation.
-
-```
-cd backend
-.venv\Scripts\python -m repro.cli demo offbyone        # Windows
-# .venv/bin/python -m repro.cli demo offbyone          # macOS / Linux
-```
-
-You'll see the agent's steps stream (`Reproducing failure…` → `Root cause hypothesis…` →
-`✓ fix verified in sandbox`), then a full report, then the unified diff. Scroll up slowly
-while talking. In Zoom: **Share Screen → the terminal window**.
-
-Other bugs to run instead: `auth`, `api`, `sql`, `auth2`.
-
-### Route A — the dashboard on your laptop (looks best)
-
-Needs two terminal windows open **before** the call:
-
-```
-# window 1 — backend
-cd backend
-.venv\Scripts\python -m pip install -r requirements.txt
-.venv\Scripts\python run.py                  # → http://127.0.0.1:8000
-```
-
-```
-# window 2 — dashboard
-cd frontend
-npm install
-npm run dev                                  # → http://localhost:5173
-```
-
-Then: open **http://localhost:5173** in Chrome/Edge → leave it on the landing page →
-Zoom **Share Screen → pick the browser window** (not "Entire Screen") → click **Try REPRO**.
-
-The investigation finishes in about 3 seconds, so narrate *while* it runs.
-
-If `npm run dev` says the port is busy, something else is on 5173 — close it and retry, or
-run `npm run dev -- --port 5174` and use that URL.
-
-### Route C — the preview inside this chat
-
-The right-side **Browser panel** in this chat is serving the same dashboard. You can share
-that window. Caveat: it depends on this cloud session staying alive; it is not a
-self-contained artifact. Route A/B on your own machine are safer for a live meeting.
-
-### 5 minutes before the call
-
-- Run the demo once already (this installs dependencies and warms the caches — the first
-  `pip install` / `npm install` is the slow part, not the demo).
-- Close Slack/mail, turn on Do Not Disturb so no notification banner appears on screen.
-- Press **Ctrl +** a couple of times in the browser to make text readable over Zoom.
-- Keep this file open on your phone or a second screen for the script.
-- If the dashboard dies mid-demo, switch to Route B in a fresh terminal — it takes seconds.
+The claim to stress: **nothing is fabricated**. Every count, runtime value and diff in the
+UI comes from actual execution (pytest output, `sys.settrace` events, the applied patch).
+The interface is a view over evidence, not the evidence itself.
 
 ---
 
-## What you had already claimed vs. what was newly measured
+## Before the call (do this 5 minutes early)
 
-These are two different things. Keep them separate on the call.
+1. Start the backend and frontend on **your laptop** (not the cloud preview):
 
-### Already published in your repo — these are "your previous numbers"
+   ```powershell
+   # window 1
+   cd backend
+   .\.venv\Scripts\python -m pip install -r requirements.txt
+   .\.venv\Scripts\python run.py                 # http://127.0.0.1:8000
 
-From `README.md` (line ~224) and the committed artifact `benchmark_results.json`
-(run dated 2026-08-25):
+   # window 2
+   cd frontend
+   npm install
+   npm run dev                                   # http://localhost:5173
+   ```
 
-| What | Value |
-|---|---|
-| Fix rate on the 9-repo corpus (rule engine, no LLM) | **9/9 = 100%** |
-| By class | NULL dereference 3/3 · Off-by-one 2/2 · API response-shape 2/2 · SQL schema drift 1/1 · Auth logic 1/1 |
-| Attempts per bug | 1 |
-| Confidence | 72–90% |
-| Patch size | 1–2 lines |
-| Time per bug | 13.7–15.1 s |
-| CI enforcement | `.github/workflows/ci.yml` asserts `fixed == total`, so the gate fails below 100% |
+2. Run the demo once, so pytest caches and imports are warm. The run itself is ~2–3 s.
+3. Open the landing page, press **Ctrl +** twice, close Slack/mail, enable Do Not Disturb.
+4. Keep a terminal open in the repository root as the fallback:
 
-I re-ran this today: **still 9/9**, exit code 0, now 2.8–2.9 s per entry on this machine.
+   ```powershell
+   cd backend
+   .\.venv\Scripts\python -m repro.cli demo offbyone
+   ```
 
-### Newly measured today — not previously stated anywhere
+5. In Zoom: **Share Screen → the browser window** (not "Entire Screen").
 
-| What | Value |
-|---|---|
-| Dashboard end-to-end (UI → agent → report) | **fixed**, `1p/2f → 3p/0f`, 10/10 safety checks, 2.9 s |
-| `benchmark_v2` (12 harder bugs), rules-only, **before today's rules** | 3/12 = 25% patch correctness |
-| `benchmark_v2`, rules-only, **after the full rule set** | **12/12 = 100%** patch correctness |
-| └ reproduction rate | 100% |
-| └ diagnosis accuracy | 0.35 → **0.68** |
-| └ localization rate | 25% → **100%** |
-| └ patch generation | 25% → **100%** |
-| └ regression-free fix rate | 25% → **100%** |
-| └ false diagnosis rate | 0% (unchanged) |
-| └ avg attempts / time | 1.17 → **1.0** · 2.96 s |
-
-### Three caveats that keep you honest
-
-1. **9/9 measures the nine failure classes the rules were written for**, so it is close to
-   circular. It is a regression gate, not evidence of general debugging ability.
-2. **12/12 is a regression suite now, not a generalisation claim.** The rules for the last
-   three classes were written *after* seeing this corpus, so 100% says "no longer breaks on
-   these", not "works on unseen bugs". Quote the progression honestly: **3/12 with the
-   original rule set → 12/12 after adding seven rules for these classes**, measured today on
-   this corpus. It is not in your README and no results file is committed for it
-   (`benchmark_v2_results.json` does not exist yet).
-3. The `63/100` in the `benchmark_v2.py` docstring is an **illustrative example** of honest
-   reporting, not a result. Don't quote it. And there are **no** LLM/hybrid numbers —
-   no API key was configured, so say "not yet measured" rather than estimating.
-
-Say this out loud, unprompted: *"I deliberately built a second, harder benchmark that
-reports my failures, because the first one only measures the classes I already handle."*
-That converts your weak spot into the strongest part of the conversation.
+Two rules for the demo: narrate *before* clicking, because the investigation finishes in
+about two seconds; and never claim an LLM is running when it is not. This run uses the
+deterministic rule engine, and that is a feature — say so.
 
 ---
 
 ## The 5-minute script
 
-**1 · Frame it (20 s).** Landing page only. Read the lifecycle strip:
-`REPRODUCE → INVESTIGATE → DIAGNOSE → PATCH → VERIFY`. Say: *"The interesting part isn't
-that it writes a patch — it's that it refuses to call anything fixed until the tests prove
-it."*
+### 0:00–0:45 · Part 1 — why verification is the problem
 
-**2 · Start the demo (10 s).** Click **Try REPRO**. Narrate while it streams: *"it copies
-the repo into a sandbox and runs the real test suite first."*
+No screen, or stay on the landing page. Say:
 
-**3 · Point at the evidence as it appears (90 s).**
+> "An LLM can write a patch that looks right and is wrong. It can also fix the one failing
+> test and quietly break three others. So the hard problem isn't generating code — it's
+> deciding whether a change is actually correct. My design principle is that a fix is a
+> hypothesis until the test suite says otherwise. REPRO therefore reproduces the failure
+> first, and it never calls anything fixed until the full suite is green in a sandbox."
 
-- **Failure detected** — `tests/test_windows.py::test_longer`, `IndexError: list index out of range` at `src/windows.py:12`. Real pytest output, not a guess.
-- **Root cause** — *"the body accesses `i + 1` but the loop runs over every index."* 90% confidence.
-- **Proposed fix** — a 1-line diff: `range(len(xs))` → `range(len(xs) - 1)`. Emphasise **minimal**.
-- **Verification** — `1 passed / 2 failed` → `3 passed / 0 failed`.
-- **Agent activity** — scroll it. A research group will care about this: every line is a
-  state transition (`state=reproduce · strategy=rules`) and the trace capture
-  (2 frames, 23 events) is logged *before* the diagnosis.
+One sentence on the two failure modes: wrong diagnosis, and a patch that is locally right
+but globally regressive. Both are addressed by the same gate.
 
-**4 · Open the full investigation (60 s).** Click **Open full investigation**. Show the
-dependency graph, the **trace view** (recorded arguments and return values, not LLM
-narration), and the **diff**.
+### 0:45–1:40 · Part 2 — architecture, in one pass
 
-**5 · The oversight story (90 s).** This is the hook for Bastian's topic — *autonomous
-agents with human oversight*:
+Stay on the landing page and point at the lifecycle strip
+`REPRODUCE → INVESTIGATE → DIAGNOSE → PATCH → VERIFY`. Explain, in this order:
 
-- **10 validation checks** before a patch counts: 3 dynamic (failure fixed, previously
-  passing tests still pass, no new failures) + 7 static, run *before* anything is applied
-  (minimality, scope, syntax, doesn't edit tests, doesn't disable assertions, doesn't
-  remove error handling, no suspicious ops).
-- **Risk scoring** LOW / MEDIUM / HIGH — a HIGH-risk patch is stored but **never applied**;
-  it blocks on explicit human approval (`needs-approval`).
-- **Loop guards + budget**: identical patches or hypotheses are refused; the state machine
-  escalates `rules → llm → deep-evidence → terminate` or stops and reports why. 8 iteration
-  budget, 3 repair rounds.
-- **Blast radius**: the repo only executes inside a sandbox copy; applying to a real
-  checkout needs a confirmed click and lands on `repro/fix-<id>`.
+1. **Failure identification** — the repo is copied into a sandbox, pytest runs, and the
+   output is parsed into a structured record: failing test id, error type, message,
+   deepest `file:line`, and stack frames. The failing test is then re-run alone with a long
+   traceback, so the record is genuine and reproducible.
+2. **Investigation** — that test is re-run under a `sys.settrace` tracer that records a call
+   tree with arguments, return values, and the locals at the exception point.
+3. **Diagnosis and localization** — the analyzer reasons over the error, stack, trace,
+   source window and schema. The hypothesis carries a `patch_hint` (`file`, line, rule) and
+   separates **observed evidence** from **inferred reasoning**.
+4. **Patch and verification** — a patch is *planned*, never applied immediately. Static
+   checks run first; then it is applied to the sandbox copy, the target test is re-run, then
+   the full suite. Any new failure reverts it.
 
-Close with: *"The research question I'd want to explore is where the human checkpoint
-belongs — after diagnosis, or only before the commit."*
+Say explicitly: *"The reasoner is swappable — rules today, an LLM optionally behind the
+same validation gate. The verifier is the part I care about."*
+
+If they want code rather than the UI, open these tabs now (or mention them):
+`backend/repro/tests.py` (`parse_failure`), `trace.py`, `agent.py` (`_attempt`),
+`validation.py` (the 10 checks), `benchmark_v2.py` (metrics).
+
+### 1:40–3:40 · Part 3 — show it working
+
+**1:40** Click **Try REPRO** on the landing page. While it runs (~2–3 s), say:
+
+> "It is copying the repo into a sandbox, installing nothing because this project is
+> stdlib-only, and running the real pytest suite."
+
+**1:50 — Failure detected.** Point at the test id, `IndexError: list index out of range`,
+and `src/windows.py:12`. Say: *"This is pytest's output, parsed — not generated text."*
+
+**2:10 — Root cause.** It should read:
+
+> Off-by-one: `pairs.append((xs[i], xs[i + 1]))` indexes past the end inside
+> `for i in range(len(xs))` — 90% confidence.
+
+Say: *"The evidence is the loop bound, the body indexing `i + 1`, and the runtime values at
+the failure. The rule is deterministic; the trace is what makes it grounded."*
+
+**2:30 — Proposed fix.** One line: `range(len(xs))` → `range(len(xs) - 1)`, +1/−1.
+Emphasise minimality: *"It is not rewriting the function; it changes the bound that is
+provably wrong."*
+
+**2:50 — Verification.** Before `1 passed / 2 failed` → after `3 passed / 0 failed`; full
+suite green; risk LOW. Say: *"The number that matters is the second one. One test passing
+would not be enough."*
+
+**3:00 — Open full investigation.** Click **Open full investigation**, then show, in this
+order and quickly:
+
+- **Runtime trace** — 2 frames, 23 events; expand it to show recorded arguments and return
+  values, not prose.
+- **Root cause analysis** — the observed-vs-inferred columns. This is the epistemic point:
+  facts and reasoning are separated.
+- **Proposed fix → 10 safety checks** — expand the details. 10/10 passed; name the
+  categories: minimal, expected files only, syntax, no test edits, assertions intact, error
+  handling intact, no suspicious operations, failure fixed, no regressions.
+- **Debug state machine** — strategy `rules`, iterations `1/8`, no loops. *"It can escalate
+  rules → LLM → deep-evidence, or terminate and explain why; it does not spin."*
+
+Close this segment with the blast-radius point:
+
+> "All of this happened in a copy. The repository on disk is untouched. Applying requires a
+> separate confirmed action and creates `repro/fix-<id>` — the agent cannot silently commit."
+
+**Fallback:** if the UI fails, switch to the open terminal and run
+`python -m repro.cli demo offbyone`. It prints the same investigation as a report and diff
+in about 2 seconds. Do not debug the UI live.
+
+### 3:40–4:45 · Part 4 — results and limitations
+
+Quote only these numbers, and say which corpus each belongs to.
+
+| Result | Value |
+|---|---|
+| Original 9-bug corpus, rules only | **9/9 fixed**, exit 0; CI gate asserts 100% |
+| Published per-bug cost | 1 attempt, 72–90% confidence, 1–2 line patches |
+| Original run time (published) | 13.7–15.1 s per bug; re-run today: ~2.8 s |
+| Second, harder corpus — before new rules | **3/12** patch correctness |
+| Second corpus — current rules | **12/12** |
+| Diagnosis accuracy on second corpus | 0.35 → **0.675** |
+| Root-cause localization | 25% → **100%** |
+| False diagnosis rate | **0%** (unchanged) |
+| Attempts / time per bug | 1.17 → **1.0** · **2.35 s** average |
+| Live demo safety checks | **10/10**, 2.2 s |
+
+Then the caveats, unprompted and in one breath:
+
+- The 9/9 corpus contains exactly the classes the rules were written for — it is a
+  regression gate, not evidence of general debugging ability.
+- The second corpus started at 3/12; I then added rules for the nine classes it exposed.
+  12/12 says "these no longer break", not "works on unseen bugs".
+- **No LLM or hybrid numbers.** No API key was configured, so all numbers are rules-only.
+  Say "not measured" rather than estimating.
+- Python + pytest only; patches are capped at 30 changed lines / 3 files; one failing test
+  targeted at a time.
+- The sandbox is process-level isolation (copy, stripped environment, timeout); Docker
+  isolation is optional. It is not a hardened VM for hostile code.
+- Confidence is a rule-derived heuristic, not a calibrated probability.
+
+The honest framing is stronger than the 100%s:
+
+> "I deliberately built a second benchmark that reported my failures, because the first one
+> only measured what I already handled. The interesting result is the gap: 3/12, then the
+> specific rules I added. That is the methodology I would want to extend."
+
+### 4:45–5:00 · Close
+
+> "The open question I'd want to study here is where the human checkpoint belongs — after
+> diagnosis, before the patch is attempted, or only before commit. Right now it is before
+> commit, and HIGH-risk patches also require explicit approval before apply. That is the
+> oversight question I think is genuinely unresolved."
+
+Then stop talking. Let them ask.
 
 ---
 
-## Questions to expect
+## The technical questions — 20–40 second answers
 
-**"Is this an LLM agent?"**
-Rules-first: a deterministic, evidence-grounded engine by default; an LLM
-(OpenAI-compatible / Anthropic / Ollama) is an optional escalation rung behind the same
-validation gate. Every candidate patch — model or rule — must pass identical checks, and
-the LLM's self-reported risk can never downgrade a HIGH-risk finding.
+**How does it identify a failure?**
+It runs the project's real test suite in a sandbox and parses pytest's output into a
+structured failure record: failing test id, error type and message, deepest frame and full
+stack. It then re-runs that single test with `--tb=long`; if it does not fail again, the
+failure is not considered reproducible. No model is involved in deciding *that* something
+failed.
 
-**"How do you stop it gaming the tests?"**
-Static checks 7–8 reject patches that edit tests or disable assertions; check 5 restricts
-the diff to expected files; check 2 re-runs the whole suite to catch regressions.
+**How does it decide which code to modify?**
+Three signals: the deepest failing frame (`file:line`), the runtime trace of the failing
+path (arguments, returns, exception locals), and a source window around the failure. The
+hypothesis names a `patch_hint` file and line, and the validator restricts the diff to the
+failing file, frames on the stack, and that hint. A patch that wanders outside those files
+fails check 5 before it is ever applied.
 
-**"What happens when it can't fix it?"**
-It stops and reports the termination reason plus every hypothesis and patch it tried and
-rejected — `failed`, never a fake success. Ambiguous cases end as `needs-approval`.
+**LLM, rules, or both?**
+Both are supported, rules-first. The default engine is deterministic: symptom → rule →
+minimal edit. An LLM (OpenAI-compatible, Anthropic, or Ollama) is an optional escalation
+rung in the ladder `rules → llm → deep-evidence → terminate`. In this demo no key is set,
+so the provider is `None` and the run is pure rules. Every candidate — rule or LLM — passes
+the identical validation gate, and an LLM's self-reported risk cannot downgrade a HIGH-risk
+finding.
 
-**"Does it only do Python?"**
-Today: Python + pytest, with generic language/framework/dependency/test-runner detection
-and a module graph. Other stacks are extension work, not done.
+**How do you prevent an incorrect patch from being accepted?**
+Ten checks. Seven static checks run **before** applying anything: minimality, only expected
+files, syntax, no test edits, assertions intact, error handling intact, no suspicious
+operations. Then three dynamic checks after applying in the sandbox: the original failure is
+gone, every previously passing test still passes, and no new failure appears. Any regression
+reverts the patch. HIGH risk is stored but never auto-applied — it becomes
+`needs-approval`. The loop refuses identical hypotheses or patches, and stops after 8
+iterations / 3 repair rounds with a termination reason. A patch cannot make tests pass by
+editing or weakening them.
+
+**How do you evaluate success?**
+Two corpora and per-entry metrics, not one headline number. The original corpus is 9 bugs
+with a CI gate at 9/9. The second is 12 harder bugs and reports reproduction rate,
+diagnosis accuracy, localization, patch generation, patch correctness, regression-free fix
+rate, false diagnosis rate, attempts, time, and token/cost when an LLM is used. Results are
+versioned JSON so two REPRO versions can be compared. Current rules-only result on the
+second corpus: 12/12, diagnosis 0.675, localization 100%, false diagnosis 0%.
+
+**What happens when the model is unavailable?**
+The provider abstraction returns `None`; the agent simply skips the LLM branch and keeps
+using the rules. If a provider call throws, the exception is caught, logged as a warning,
+and the rule-based result is kept. That is why the demo runs with zero API keys and no
+network dependency. The trade-off is coverage: without a model, unsupported failure classes
+end in an explicit "no rule matched" fallback rather than a guess.
+
+---
+
+## Follow-ups you may get
+
+**"What if the test itself is wrong?"**
+The agent treats tests as the specification and refuses to modify them (static check 7).
+If the spec is wrong, the verified patch is wrong in exactly the same way — that is a
+fundamental limit of test-based repair, and the reason a human still reviews the diff.
+
+**"Why not just ask an LLM?"**
+Because the bottleneck is verification, not generation. An LLM can be plugged in as the
+reasoner, but it still has to pass the same executable gate. I have not measured LLM mode,
+so I don't claim it is better.
+
+**"What failed in the second benchmark?"**
+Initially nine of twelve entries: concurrency, data transformation, exception handling,
+external dependencies, incorrect API usage, incorrect conditions, regression, state
+transitions, and type errors. They ended in fallback. I added rules for those failure
+shapes; that is why the number moved — and why I call it a regression suite, not
+generalization.
 
 **"What would an internship add?"**
-Pick one: (a) broaden beyond Python/JS, (b) turn diagnosis into a learned policy with the
-current verifier as reward signal, or (c) study oversight placement — where a checkpoint
-actually changes trust or catch rate.
+One of: broaden beyond Python/pytest; turn diagnosis into a learned policy with the current
+verifier as reward signal; or study checkpoint placement — where a human checkpoint actually
+changes trust or catch rate. The third is closest to Bastian's topic.
 
 ---
 
 ## If asked for the repo
 
-`README.md` has architecture, benchmark tables and deploy instructions;
-`benchmark_results.json` is the machine-readable 9/9 run; `backend/repro/benchmark_v2.py`
-documents the honest metrics and which ones still fail.
+`README.md` has the architecture, benchmark tables and deploy instructions.
+`benchmark_results.json` is the machine-readable 9/9 run.
+`backend/repro/benchmark_v2.py` documents the honest metrics and which ones still fail.
+`examples/pricewatch/` is a small realistic library whose 4 failures REPRO fixes
+(5 passed / 4 failed → 9/9); it is a better "real repo" story than the bundled demos.

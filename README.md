@@ -44,13 +44,19 @@ docker run -p 8000:8000 -v repro-data:/app/data -e REPRO_DATA_DIR=/app/data repr
 
 ### Backend (API + agent)
 
-```bash
+Run these from the repository root — the folder that contains `backend/` and `frontend/`.
+
+```powershell
 cd backend
 python -m venv .venv
-.venv/Scripts/python -m pip install -r requirements.txt   # Windows
+.\.venv\Scripts\python -m pip install -r requirements.txt   # Windows (PowerShell)
 # .venv/bin/python -m pip install -r requirements.txt      # macOS / Linux
-.venv/Scripts/python run.py                                # → http://127.0.0.1:8000
+.\.venv\Scripts\python run.py                               # → http://127.0.0.1:8000
 ```
+
+> In PowerShell a command that starts with `.` is parsed as a module name, so write the
+> interpreter as `.\.venv\Scripts\python`. Without the leading `.\` you get
+> `The module '.venv' could not be loaded`.
 
 ### Frontend (dashboard)
 
@@ -65,15 +71,15 @@ investigation against a bundled broken repository.
 
 ### CLI
 
-```bash
+```powershell
 cd backend
-.venv/Scripts/python -m repro.cli demo auth                 # investigate a bundled bug
-.venv/Scripts/python -m repro.cli analyze /path/to/repo     # or a git URL
-.venv/Scripts/python -m repro.cli status <id>
-.venv/Scripts/python -m repro.cli report <id>
-.venv/Scripts/python -m repro.cli diff <id>
-.venv/Scripts/python -m repro.cli verify <id>
-.venv/Scripts/python -m repro.cli benchmark                 # run the bug corpus, report fix rate
+.\.venv\Scripts\python -m repro.cli demo auth                 # investigate a bundled bug
+.\.venv\Scripts\python -m repro.cli analyze /path/to/repo     # or a git URL
+.\.venv\Scripts\python -m repro.cli status <id>
+.\.venv\Scripts\python -m repro.cli report <id>
+.\.venv\Scripts\python -m repro.cli diff <id>
+.\.venv\Scripts\python -m repro.cli verify <id>
+.\.venv\Scripts\python -m repro.cli benchmark                 # run the bug corpus, report fix rate
 ```
 
 ---
@@ -191,11 +197,11 @@ small, self-contained Python projects, each with a genuine bug modeled on a real
 failure class and a failing test that defines the expected behaviour. The benchmark runs
 the full agent loop against every entry and reports the fix rate, overall and by class:
 
-```bash
+```powershell
 cd backend
-.venv/Scripts/python -m repro.benchmark                 # all entries, print table + JSON
-.venv/Scripts/python -m repro.benchmark --only api-v2   # a subset (comma/space-separated)
-.venv/Scripts/python -m repro.benchmark --db bench.db   # custom dedicated db
+.\.venv\Scripts\python -m repro.benchmark                 # all entries, print table + JSON
+.\.venv\Scripts\python -m repro.benchmark --only api-v2   # a subset (comma/space-separated)
+.\.venv\Scripts\python -m repro.benchmark --db bench.db   # custom dedicated db
 ```
 
 The same run is available through the CLI (`python -m repro.cli benchmark`). Each entry

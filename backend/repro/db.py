@@ -259,6 +259,11 @@ def get_investigation(iid: str) -> Optional[dict]:
         for p in d["patches"]:
             p["applied"] = bool(p["applied"])
             p["report"] = _uj(p.pop("report_json", None))
+        for v in d["verifications"]:
+            v["before"] = _uj(v.pop("before_json", None))
+            v["after"] = _uj(v.pop("after_json", None))
+            v["full"] = _uj(v.pop("full_json", None))
+            v["passed"] = bool(v["passed"])
         return d
     finally:
         conn.close()

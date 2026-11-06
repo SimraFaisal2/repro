@@ -13,12 +13,12 @@ function AgentStatus() {
   }, []);
   return (
     <span
-      className={`inline-flex items-center gap-1.5 text-[11px] font-medium rounded-full border px-2 py-0.5 ${
-        ok ? "text-good border-good/30" : ok === null ? "text-muted border-border" : "text-bad border-bad/30"
+      className={`inline-flex items-center gap-1.5 text-[10.5px] tracking-wide rounded-full border px-2.5 py-1 ${
+        ok ? "text-good border-good/25" : ok === null ? "text-muted border-border" : "text-bad border-bad/30"
       }`}
     >
       <span className={`size-1.5 rounded-full bg-current ${ok === true ? "pulse-dot" : ""}`} />
-      {ok === null ? "Connecting…" : ok ? "Agent Ready" : "Offline"}
+      {ok === null ? "Connecting" : ok ? "Agent ready" : "Offline"}
     </span>
   );
 }
@@ -28,46 +28,49 @@ export default function Layout() {
   const inInvestigation = loc.pathname.startsWith("/investigation");
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="h-12 border-b border-border bg-panel/60 backdrop-blur sticky top-0 z-20">
-        <div className="h-full max-w-[1600px] mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2 group">
-              <span className="grid place-items-center size-6 rounded bg-accent/15 border border-accent/40 text-accent">
-                <Bug size={14} strokeWidth={2.2} />
+      <header className="sticky top-0 z-20 border-b border-border bg-bg/80 backdrop-blur-md">
+        <div className="h-14 max-w-page mx-auto px-5 flex items-center justify-between">
+          <div className="flex items-center gap-7">
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <span className="grid place-items-center size-7 rounded-[7px] border border-border bg-panel2 text-accent transition-colors group-hover:border-accent/40">
+                <Bug size={14} strokeWidth={1.8} />
               </span>
-              <span className="font-mono font-bold tracking-tight text-[15px]">
-                REPRO
-                <span className="text-faint font-normal ml-1.5 hidden sm:inline">Runtime Error Investigation &amp; Repair</span>
+              <span className="font-display font-medium tracking-[-0.02em] text-[17px]">REPRO</span>
+              <span className="hidden lg:inline text-[10.5px] tracking-[0.14em] uppercase text-faint ml-1">
+                Runtime error investigation &amp; repair
               </span>
             </Link>
-            <nav className="hidden md:flex items-center gap-1 text-sm">
+            <nav className="hidden md:flex items-center gap-1 text-[13px]">
               <NavLink
                 to="/dashboard"
                 className={({ isActive }) =>
-                  `flex items-center gap-1.5 px-3 py-1.5 rounded-md ${
-                    isActive ? "text-accent bg-accent/10" : "text-muted hover:text-ink hover:bg-panel2"
+                  `flex items-center gap-1.5 px-2.5 py-1.5 rounded-[7px] ${
+                    isActive ? "text-ink bg-panel2" : "text-muted hover:text-ink"
                   }`
                 }
               >
-                <LayoutDashboard size={14} /> Repositories
+                <LayoutDashboard size={13} /> Repositories
               </NavLink>
             </nav>
           </div>
           <div className="flex items-center gap-3">
             {inInvestigation && (
-              <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] text-faint mono">
-                <Radio size={11} className="text-good" /> live
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-[10.5px] text-faint mono">
+                <Radio size={10} className="text-good" /> live
               </span>
             )}
             <AgentStatus />
           </div>
         </div>
       </header>
-      <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 py-6">
+      <main className="flex-1 w-full max-w-page mx-auto px-5 py-6">
         <Outlet />
       </main>
-      <footer className="border-t border-border py-4 text-[11px] text-faint mono max-w-[1600px] mx-auto w-full px-4">
-        REPRO — untrusted repositories execute only inside an isolated sandbox.
+      <footer className="border-t border-border">
+        <div className="max-w-page mx-auto px-5 py-5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-faint">
+          <span>REPRO — untrusted repositories execute only inside an isolated sandbox.</span>
+          <span className="mono tracking-wide">reproduce · investigate · diagnose · patch · verify</span>
+        </div>
       </footer>
     </div>
   );

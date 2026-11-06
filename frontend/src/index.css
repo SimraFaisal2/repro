@@ -14,20 +14,27 @@ body,
 
 body {
   @apply bg-bg text-ink font-sans antialiased;
-  background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(88, 166, 255, 0.06), transparent);
+  background-image: radial-gradient(55rem 28rem at 50% -12%, rgba(245, 240, 230, 0.055), transparent 72%);
+  background-repeat: no-repeat;
+  font-feature-settings: "ss01" 1, "cv11" 1;
+}
+
+::selection {
+  background: rgba(245, 240, 230, 0.18);
+  color: #fff;
 }
 
 /* slim scrollbars for the dev-tool feel */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #30363d transparent;
+  scrollbar-color: #2a2a2a transparent;
 }
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: #30363d;
+  background: #2a2a2a;
   border-radius: 4px;
 }
 *::-webkit-scrollbar-track {
@@ -36,31 +43,34 @@ body {
 
 @layer components {
   .panel {
-    @apply border border-border rounded-lg bg-panel;
+    @apply border border-border rounded-[10px] bg-panel;
   }
   .panel-head {
-    @apply flex items-center justify-between px-4 py-2 border-b border-border text-xs font-semibold tracking-wide text-muted uppercase;
+    @apply flex items-center justify-between px-4 py-2.5 border-b border-border text-[10.5px] font-medium tracking-[0.14em] text-faint uppercase;
   }
   .btn {
-    @apply inline-flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium rounded-md border transition-colors cursor-pointer;
+    @apply inline-flex items-center gap-2 px-3.5 py-2 text-[13px] font-medium rounded-[8px] border transition-colors cursor-pointer;
   }
   .btn-primary {
-    @apply btn bg-accent/15 border-accent/40 text-accent hover:bg-accent/25;
+    @apply btn bg-accent text-bg border-accent hover:bg-ink hover:border-ink;
   }
   .btn-good {
-    @apply btn bg-good/10 border-good/40 text-good hover:bg-good/20;
+    @apply btn bg-good/10 border-good/30 text-good hover:bg-good/15;
   }
   .btn-danger {
-    @apply btn bg-bad/10 border-bad/40 text-bad hover:bg-bad/20;
+    @apply btn bg-bad/10 border-bad/30 text-bad hover:bg-bad/15;
   }
   .btn-ghost {
-    @apply btn bg-transparent border-border text-muted hover:text-ink hover:border-faint;
+    @apply btn bg-transparent border-border text-muted hover:text-ink hover:border-[#3a3a3a] hover:bg-panel2/60;
   }
   .input {
-    @apply w-full bg-panel2 border border-border rounded-md px-3 py-2 text-sm text-ink placeholder-faint outline-none focus:border-accent/60;
+    @apply w-full bg-panel2 border border-border rounded-[8px] px-3 py-2 text-sm text-ink placeholder-faint outline-none focus:border-accent/40;
   }
   .mono {
     @apply font-mono;
+  }
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.16em] uppercase text-muted;
   }
 }
 
@@ -76,7 +86,10 @@ body {
   animation: pulse-dot 1.6s ease-in-out infinite;
 }
 
-@keyframes sweep {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise {
+  animation: rise 0.45s ease-out both;
 }

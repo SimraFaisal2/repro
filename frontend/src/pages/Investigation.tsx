@@ -211,7 +211,7 @@ export default function Investigation() {
         <Link to="/dashboard" className="text-faint hover:text-ink"><ArrowLeft size={16} /></Link>
         <div className="min-w-0">
           <div className="flex items-center gap-2.5">
-            <h1 className="text-lg font-semibold truncate">{project?.name || "investigation"}</h1>
+            <h1 className="font-display text-[22px] font-medium tracking-[-0.02em] truncate">{project?.name || "investigation"}</h1>
             <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium rounded-full border px-2 py-0.5 ${STATUS_COLOR[status] || STATUS_COLOR.created}`}>
               <span className={`size-1.5 rounded-full bg-current ${running ? "pulse-dot" : ""}`} />
               {STATUS_LABEL[status] || status}

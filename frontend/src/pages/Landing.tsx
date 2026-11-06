@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  ArrowUpRight,
   Bug,
   Check,
   FlaskConical,
@@ -182,51 +183,93 @@ export default function Landing() {
   const needsApproval = demo?.status === "needs-approval";
 
   return (
-    <div className="max-w-3xl mx-auto pt-16 pb-24">
-      <div className="text-center space-y-6">
-        <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-[11px] text-accent font-mono">
-          <Bug size={12} /> AI software investigator
-        </div>
-        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
-          REPRO
-          <span className="block text-lg sm:text-xl font-normal text-muted mt-4 max-w-xl mx-auto leading-relaxed">
-            It doesn't just tell you what's broken. It{" "}
-            <span className="text-ink">reproduces</span> the failure,{" "}
-            <span className="text-ink">finds</span> the cause,{" "}
-            <span className="text-ink">fixes</span> it, and{" "}
-            <span className="text-ink">proves the fix works</span>.
+    <div className="mx-auto max-w-6xl pt-10 pb-24">
+      {/* ---------- hero ---------- */}
+      <section className="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-16 items-end">
+        <div className="rise">
+          <span className="eyebrow">
+            <span className="size-1.5 rounded-full bg-good" />
+            AI software investigator
           </span>
-        </h1>
-        <div className="flex items-center justify-center gap-3 pt-2">
-          <button className="btn-primary !px-6 !py-2.5 text-base" disabled={busy} onClick={() => tryDemo("auth")}>
-            <Play size={16} /> Try REPRO
-          </button>
-          <button className="btn-ghost" onClick={() => nav("/dashboard")}>
-            <FolderGit2 size={15} /> Analyze Repository
-          </button>
+          <h1 className="mt-6 font-display text-[48px] sm:text-7xl lg:text-[80px] leading-[0.92] tracking-[-0.04em] font-medium">
+            It doesn't just
+            <br />
+            tell you what's
+            <br />
+            broken.
+          </h1>
+          <p className="mt-7 max-w-lg text-[16.5px] leading-relaxed text-muted">
+            REPRO <span className="text-ink">reproduces</span> the failure,{" "}
+            <span className="text-ink">finds</span> the cause, writes the smallest fix, and{" "}
+            <span className="text-ink">proves</span> it by running your tests again.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <button className="btn-primary !px-5 !py-2.5" disabled={busy} onClick={() => tryDemo("offbyone")}>
+              <Play size={14} /> Try REPRO
+            </button>
+            <button className="btn-ghost !px-4 !py-2.5" onClick={() => nav("/dashboard")}>
+              <FolderGit2 size={14} /> Analyze a repository
+            </button>
+          </div>
+          <p className="mt-5 font-mono text-[10.5px] text-faint">
+            no setup · no API keys · runs a real investigation on a bundled broken repo
+          </p>
         </div>
-        <p className="text-[11px] text-faint mono">
-          no setup · no API keys · runs a real investigation on a bundled broken repo
-        </p>
-      </div>
 
-      <div className="mt-16">
-        <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
-          {LIFECYCLE.map((step, i) => (
-            <div key={step} className="flex items-center gap-2 sm:gap-3">
-              <span className="px-3 py-1.5 rounded-md border border-border bg-panel text-[11px] font-mono tracking-wider text-muted">
-                {step}
-              </span>
-              {i < LIFECYCLE.length - 1 && <ArrowRight size={13} className="text-faint" />}
+        {/* example repair card */}
+        <div className="rise rounded-[12px] border border-border bg-panel/80 p-5">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-faint">example repair</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-good/25 bg-good/10 px-2 py-0.5 font-mono text-[10px] text-good">
+              <Check size={10} /> verified
+            </span>
+          </div>
+          <div className="mt-5 space-y-1 font-mono text-[12px] leading-relaxed">
+            <div className="text-bad">IndexError: list index out of range</div>
+            <div className="text-faint">tests/test_windows.py::test_longer · src/windows.py:12</div>
+          </div>
+          <div className="my-5 border-t border-border" />
+          <pre className="overflow-x-auto font-mono text-[12px] leading-[1.9]">
+            <span className="block text-faint">  def sliding_pairs(xs):</span>
+            <span className="block text-faint">      out = []</span>
+            <span className="block text-bad">-     for i in range(len(xs)):</span>
+            <span className="block text-good">+     for i in range(len(xs) - 1):</span>
+            <span className="block text-faint">          out.append((xs[i], xs[i + 1]))</span>
+          </pre>
+          <div className="mt-5 grid grid-cols-[1fr_auto_1fr] items-center gap-3 border-t border-border pt-4 font-mono text-[11px]">
+            <div>
+              <div className="text-faint">before</div>
+              <div className="mt-0.5 text-bad">1 passed / 2 failed</div>
             </div>
-          ))}
+            <ArrowRight size={13} className="text-faint" />
+            <div className="text-right">
+              <div className="text-faint">after</div>
+              <div className="mt-0.5 text-good">3 passed / 0 failed</div>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center gap-2 text-[10.5px] text-faint">
+            <Microscope size={11} /> root cause · off-by-one · confidence 90%
+          </div>
         </div>
-      </div>
+      </section>
+
+      {/* ---------- lifecycle ---------- */}
+      <ol className="mt-16 grid grid-cols-2 sm:grid-cols-5 border-t border-border">
+        {LIFECYCLE.map((step, i) => (
+          <li
+            key={step}
+            className="border-b sm:border-b-0 sm:border-r border-border sm:px-4 py-4 first:pl-0 last:border-r-0"
+          >
+            <div className="font-mono text-[10px] text-faint">0{i + 1}</div>
+            <div className="mt-1 text-[12px] font-medium tracking-[0.12em]">{step}</div>
+          </li>
+        ))}
+      </ol>
 
       {error && (
-        <div className="mt-8 flex items-center justify-center gap-2 rounded-md border border-bad/40 bg-bad/10 px-4 py-2.5 text-sm text-bad">
+        <div className="mt-8 flex items-center gap-2 rounded-[8px] border border-bad/30 bg-bad/10 px-4 py-2.5 text-sm text-bad">
           <X size={14} /> {error}
-          <button onClick={() => setError("")} className="ml-2 text-faint hover:text-ink">
+          <button onClick={() => setError("")} className="ml-auto text-bad/70 hover:text-bad">
             <X size={13} />
           </button>
         </div>
@@ -234,25 +277,35 @@ export default function Landing() {
 
       {/* ---------- live demo panel ---------- */}
       {demo && (
-        <div ref={panelRef} className="mt-10 space-y-5">
+        <div ref={panelRef} className="mt-12 space-y-5">
           {/* verdict banner (when finished) */}
           {done && (
             <div
-              className={`rounded-md border px-4 py-3 text-sm ${
+              className={`rounded-[10px] border px-4 py-3 text-sm ${
                 fixed
-                  ? "border-good/40 bg-good/10 text-good"
+                  ? "border-good/30 bg-good/10 text-good"
                   : failed
-                  ? "border-bad/40 bg-bad/10 text-bad"
+                  ? "border-bad/30 bg-bad/10 text-bad"
                   : needsApproval
-                  ? "border-warn/40 bg-warn/10 text-warn"
+                  ? "border-warn/30 bg-warn/10 text-warn"
                   : "border-border bg-panel text-muted"
               }`}
             >
               <div className="flex flex-wrap items-center gap-3">
-                <span className="font-semibold">
-                  {fixed ? "✓ Fixed — verified in the sandbox" : failed ? "✗ Not fixed — the agent stopped and explained why" : needsApproval ? "⚠ High-risk patch — awaiting human approval" : "No failure detected"}
+                <span className="font-medium">
+                  {fixed
+                    ? "✓ Fixed — verified in the sandbox"
+                    : failed
+                    ? "✗ Not fixed — the agent stopped and explained why"
+                    : needsApproval
+                    ? "⚠ High-risk patch — awaiting human approval"
+                    : "No failure detected"}
                 </span>
-                <span className={`ml-auto inline-flex items-center gap-1.5 text-[11px] rounded-full border px-2 py-0.5 ${STATUS_COLOR[demo.status] || STATUS_COLOR.created}`}>
+                <span
+                  className={`ml-auto inline-flex items-center gap-1.5 text-[11px] rounded-full border px-2 py-0.5 ${
+                    STATUS_COLOR[demo.status] || STATUS_COLOR.created
+                  }`}
+                >
                   {STATUS_LABEL[demo.status] || demo.status}
                 </span>
               </div>
@@ -273,7 +326,19 @@ export default function Landing() {
                   <span>
                     patch <span className="text-good">+{demo.patch.lines_added}</span>
                     <span className="text-bad">-{demo.patch.lines_removed}</span> · {demo.patch.files_changed} file(s)
-                    {demo.patch.risk && <span className={`ml-2 mono ${demo.patch.risk === "HIGH" ? "text-bad" : demo.patch.risk === "MEDIUM" ? "text-warn" : "text-good"}`}>risk: {demo.patch.risk.toLowerCase()}</span>}
+                    {demo.patch.risk && (
+                      <span
+                        className={`ml-2 mono ${
+                          demo.patch.risk === "HIGH"
+                            ? "text-bad"
+                            : demo.patch.risk === "MEDIUM"
+                            ? "text-warn"
+                            : "text-good"
+                        }`}
+                      >
+                        risk: {demo.patch.risk.toLowerCase()}
+                      </span>
+                    )}
                     {demo.patch.report?.regression_status && demo.patch.report.regression_status !== "none" && (
                       <span className="ml-2 mono text-bad">regression: {demo.patch.report.regression_status}</span>
                     )}
@@ -294,13 +359,13 @@ export default function Landing() {
                 const isDone = donePhases.has(ph.key);
                 const isActive = i === activePhaseIdx && running;
                 const color = isDone
-                  ? "text-good border-good/40 bg-good/10"
+                  ? "text-good border-good/30 bg-good/10"
                   : isActive
-                  ? "text-accent border-accent/40 bg-accent/10 pulse-dot"
+                  ? "text-accent border-accent/30 bg-accent/10 pulse-dot"
                   : "text-faint border-border bg-panel2/40";
                 return (
                   <div key={ph.key} className="flex items-center gap-1 shrink-0">
-                    <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-mono ${color}`}>
+                    <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-[6px] border text-[11px] font-mono ${color}`}>
                       <Icon size={12} /> {ph.label}
                       {isDone && <Check size={11} />}
                     </span>
@@ -357,7 +422,13 @@ export default function Landing() {
             <div className="space-y-5 min-w-0">
               <Panel
                 title="Proposed fix"
-                right={demo.patch ? <span className="mono text-[11px] text-faint">+{demo.patch.lines_added}/-{demo.patch.lines_removed}</span> : undefined}
+                right={
+                  demo.patch ? (
+                    <span className="mono text-[11px] text-faint">
+                      +{demo.patch.lines_added}/-{demo.patch.lines_removed}
+                    </span>
+                  ) : undefined
+                }
               >
                 {demo.patch ? (
                   <div className="space-y-2">
@@ -374,15 +445,23 @@ export default function Landing() {
               <Panel title="Verification">
                 {demo.verification ? (
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-md border border-border p-3">
+                    <div className="rounded-[8px] border border-border p-3">
                       <div className="text-[11px] uppercase text-faint mb-1">before fix</div>
-                      <div className="mono text-lg">{demo.verification.before?.passed ?? 0} <span className="text-good">passed</span></div>
-                      <div className="mono text-sm">{demo.verification.before?.failed ?? 0} <span className="text-bad">failed</span></div>
+                      <div className="mono text-lg">
+                        {demo.verification.before?.passed ?? 0} <span className="text-good">passed</span>
+                      </div>
+                      <div className="mono text-sm">
+                        {demo.verification.before?.failed ?? 0} <span className="text-bad">failed</span>
+                      </div>
                     </div>
-                    <div className="rounded-md border border-border p-3">
+                    <div className="rounded-[8px] border border-border p-3">
                       <div className="text-[11px] uppercase text-faint mb-1">after fix</div>
-                      <div className="mono text-lg">{demo.verification.after?.passed ?? 0} <span className="text-good">passed</span></div>
-                      <div className="mono text-sm">{demo.verification.after?.failed ?? 0} <span className="text-bad">failed</span></div>
+                      <div className="mono text-lg">
+                        {demo.verification.after?.passed ?? 0} <span className="text-good">passed</span>
+                      </div>
+                      <div className="mono text-sm">
+                        {demo.verification.after?.failed ?? 0} <span className="text-bad">failed</span>
+                      </div>
                     </div>
                   </div>
                 ) : running ? (
@@ -395,38 +474,51 @@ export default function Landing() {
           </div>
 
           {/* agent activity */}
-          <Panel title="Agent activity" right={running ? <Spinner /> : <span className="mono text-[11px] text-faint">{steps.length} steps</span>}>
+          <Panel
+            title="Agent activity"
+            right={running ? <Spinner /> : <span className="mono text-[11px] text-faint">{steps.length} steps</span>}
+          >
             <ActivityLog steps={steps} live={running} />
           </Panel>
         </div>
       )}
 
-      <div className="mt-16 panel">
-        <header className="panel-head">
-          <span>Bundled demo repositories</span>
-          <ScanSearch size={13} className="text-faint" />
-        </header>
+      {/* ---------- bundled repositories ---------- */}
+      <section className="mt-20">
+        <div className="flex items-end justify-between border-b border-border pb-3">
+          <h2 className="font-display text-[26px] font-medium tracking-[-0.02em]">Bundled repositories</h2>
+          <span className="font-mono text-[10.5px] text-faint">{DEMOS.length} demos</span>
+        </div>
         <div className="divide-y divide-border">
           {DEMOS.map((d) => (
             <button
               key={d.key}
               disabled={busy}
               onClick={() => tryDemo(d.key)}
-              className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-panel2/60 disabled:opacity-50 transition-colors"
+              className="group w-full flex items-center justify-between py-4 text-left disabled:opacity-50"
             >
-              <span className="text-sm text-ink/85">{d.label}</span>
-              <span className="text-[11px] mono text-faint">{d.key}</span>
+              <span className="flex items-center gap-3">
+                <span className="size-1.5 rounded-full bg-faint group-hover:bg-accent transition-colors" />
+                <span className="text-[14px] text-ink/90">{d.label}</span>
+              </span>
+              <span className="flex items-center gap-4">
+                <span className="font-mono text-[10.5px] text-faint">{d.key}</span>
+                <ArrowUpRight size={14} className="text-faint group-hover:text-ink transition-colors" />
+              </span>
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      <p className="mt-12 text-center text-xs text-faint leading-relaxed max-w-lg mx-auto">
-        REPRO reasons over real evidence — test output, stack traces, runtime
-        arguments and return values, schema, source. Every metric you see comes
-        from actual execution, and fixes are only ever applied inside an
-        isolated sandbox unless you explicitly approve them.
+      <p className="mt-16 max-w-2xl text-[13px] leading-relaxed text-faint">
+        REPRO reasons over real evidence — test output, stack traces, runtime arguments and return values, schema,
+        source. Every metric you see comes from actual execution, and fixes are only ever applied inside an isolated
+        sandbox unless you explicitly approve them.
       </p>
+
+      <div className="mt-10 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-faint">
+        <ScanSearch size={12} /> reproduce · investigate · diagnose · patch · verify
+      </div>
     </div>
   );
 }
